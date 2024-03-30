@@ -16,5 +16,18 @@
   
 }
 p{
+  background-color: black;
   color: white;
+  white-space-collapse: preserve-spaces;
+}
+input{
+  background: black;
+  border: none;
+  color:wheat;
+}
+#completedLetters{
+  color:rgb(45, 119, 184);
+}
+#textToBeCompleted{
+  color: grey;
 }
