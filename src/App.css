@@ -16,12 +16,13 @@
   
 }
 p{
-  background-color: black;
+  /* background-color: black; */
+  font-size: larger;
   color: white;
   white-space-collapse: preserve-spaces;
 }
 input{
-  background: black;
+  /* background: black; */
   border: none;
   color:wheat;
 }
@@ -30,4 +31,7 @@ input{
 }
 #textToBeCompleted{
   color: grey;
+}
+#errorCount{
+  color:rgb(223, 0, 0);
 }
