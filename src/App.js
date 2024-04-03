@@ -20,7 +20,22 @@ function TextBox() {
 
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
+
   let repeat = false;
+  let onlyLetters = new RegExp("[A-Za-z\\s]");
+
+  function Letter(value){
+    this.value = value;
+    this.status = null;
+
+    // function typed(input){
+    //   if(input === this.value){
+    //     this.status = 'correct';
+    //   }else{
+        
+    //   }
+    // }
+  }
 
 
   useEffect(() => {
@@ -39,7 +54,7 @@ function TextBox() {
   //Stores letters of random words in to an array
   function getRandomWords() {
     let newRandomWords = [];
-    console.log(`Dictionary: ${dictionary[0]}`);
+    // console.log(`Dictionary: ${dictionary[0]}`);
     for (let i = 0; i < 10; i++) {
       let randomIndex = Math.floor(Math.random() * 10000);
       let word = dictionary[randomIndex];
@@ -72,8 +87,6 @@ function TextBox() {
 
   },[randomWords])
 
-  //So as this component load it will Load all the available words
-  let onlyLetters = new RegExp("[A-Za-z\\s]");
 
   function handleKeyPress(event) {
     //if the letter is valid
@@ -96,14 +109,8 @@ function TextBox() {
       }
     }
 
-    //We need to take input form out of the box of the input
-
-    //We take in the event add it to the new tag only if;
-    //it is a part of the first letter in the array of randomWords
-    //If Not
-    //Then we dont update any of the variables and output and error
-
-    //The error will be the current wrong letter turned RED.
+    //Code Brainstorm
+    //We 
   }
   //Will recalculate with every key stroke
   useEffect(() => {
@@ -115,14 +122,45 @@ function TextBox() {
     let formated = (newAccuracy% 1 === 0 ) ? Math.floor(newAccuracy) : (newAccuracy);
     setAccuracy(formated);
   }
-
+  function setLetters() {
+    return (
+      <>
+        <div>{randomWords.map((letter, index) => {
+          console.log(index)
+          return <Letter key={index} value={letter} color='red'/>
+        })}</div>
+      </>)
+  }
+  // function setLetters() {
+  //   return (
+  //     <div>
+  //       {randomWords.map((letter, index) => (
+  //         <Letter key={index} value={letter} />
+  //       ))}
+  //     </div>
+  //   );
+  // }
+ 
   return (
     <>
       <div>
-        <p id='textToBeCompleted'><span id='completedLetters'>{keyboard}</span>{randomWords}</p>
+        {randomWords.length}
+        {setLetters()}
+
+
+
+        <p id='textToBeCompleted' style={{color:'orange'}}><span id='completedLetters'>{keyboard}</span>{randomWords}</p>
         <p id='errorCount'>Errors: {error}</p>
         <p>Accuracy: {accuracy}%</p>
       </div>
+    </>
+  )
+}
+
+function Letter(props) {
+  return (
+    <>
+      <span key={props.key} style={{ color: props.color }}>{props.value}</span>
     </>
   )
 }
