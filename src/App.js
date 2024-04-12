@@ -17,6 +17,7 @@ function TextBox() {
   const [dictionary, setDictionary] = useState([]);
   const [randomWords, setRandomWords] = useState([]);
   const [keyboard, setKeyboard] = useState([]);
+  const [errorChar, setErrorChar] = useState('');
 
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
@@ -27,17 +28,14 @@ function TextBox() {
   function Letter(value){
     this.value = value;
     this.status = null;
-
-    // function typed(input){
-    //   if(input === this.value){
-    //     this.status = 'correct';
-    //   }else{
-        
-    //   }
-    // }
   }
 
+  function Letter(char, status) {
+    this.char = char;
+    this.status = status;
+  }
 
+  //Collects all the Words
   useEffect(() => {
     async function buildDictionary() {
       //Text Stores all the words in dictionary into an array
@@ -49,7 +47,8 @@ function TextBox() {
       setDictionary(text);
     }
     buildDictionary();
-  }, []); // Call getRandomWords whenever dictionary changes
+  }, []);
+
 
   //Stores letters of random words in to an array
   function getRandomWords() {
@@ -65,18 +64,18 @@ function TextBox() {
     }
     setRandomWords(newRandomWords);
   }
-  
 
 
+  //Calls the phrase to be genereated
   useEffect(() => {
-    if(dictionary.length > 0){
+    if (dictionary.length > 0) {
       // Call getRandomWords after setting dictionary
       getRandomWords();
     }
-  },[dictionary])
+  }, [dictionary])
 
 
-  //DEBUGGING
+  //Event listener
   useEffect(() => {
     // Add event listener when the component mounts
     document.addEventListener('keydown', handleKeyPress);
@@ -85,32 +84,52 @@ function TextBox() {
       document.removeEventListener('keydown', handleKeyPress);
     };
 
-  },[randomWords])
+  }, [randomWords])
 
 
   function handleKeyPress(event) {
-    //if the letter is valid
-    if (event.key.length === 1 && onlyLetters.test(event.key) && randomWords[0] === event.key) {
-      let newRandomWords = randomWords.slice(1);
-      setKeyboard(prevInput => [...prevInput, event.key]);
-      setRandomWords(newRandomWords);
-      repeat = false;
+    console.log(randomWords);
+    //Set local variable to here to update values---------------------------
+    let curError = errorChar;
+    let curCharacter = new Letter();
+    curCharacter.char = event.key;
+    curCharacter.status = 'untyped';
 
-      //If there is no more letters then restart
-      if (randomWords.length === 1) {
-        getRandomWords();
-        setKeyboard([]);
-        setError(0);
-      }
-    }else{
-      if(repeat === false){
+    console.log(`${curError} and  ${event.key} Equality: ${curError === event.key} Empty: ${curError === ''}`)
+
+    if (curError === '') {
+      console.log(`curError is blank`)
+      //if the letter is valid
+      if (event.key.length === 1 && onlyLetters.test(event.key) && randomWords[0] === event.key) {
+        let newRandomWords = randomWords.slice(1);
+        curCharacter.status = 'typed';
+        if (curCharacter.status !== 'error') {
+          setKeyboard((prev) => [...prev, curCharacter]);
+        }
+        setRandomWords(newRandomWords);
+        repeated = false;
+
+
+
+
+        //If there is no more letters then restart
+        if (randomWords.length === 1) {
+          getRandomWords();
+          setKeyboard([]);
+          setError(0);
+        }
+      } else {
+        let newRandomWords = randomWords.slice(1);
+        curCharacter.status = 'error';
+        curCharacter.char = randomWords[0];
+        // console.log(`Character: ${curCharacter.char}  ${curCharacter.status}`)
+        setKeyboard((prev) => [...prev, curCharacter]);
+        setRandomWords(newRandomWords);
         setError((prevError) => prevError = prevError + 1);
         repeat = true;
       }
     }
 
-    //Code Brainstorm
-    //We 
   }
   //Will recalculate with every key stroke
   useEffect(() => {
@@ -122,47 +141,32 @@ function TextBox() {
     let formated = (newAccuracy% 1 === 0 ) ? Math.floor(newAccuracy) : (newAccuracy);
     setAccuracy(formated);
   }
-  function setLetters() {
-    return (
-      <>
-        <div>{randomWords.map((letter, index) => {
-          console.log(index)
-          return <Letter key={index} value={letter} color='red'/>
-        })}</div>
-      </>)
-  }
-  // function setLetters() {
-  //   return (
-  //     <div>
-  //       {randomWords.map((letter, index) => (
-  //         <Letter key={index} value={letter} />
-  //       ))}
-  //     </div>
-  //   );
-  // }
+
  
   return (
     <>
       <div>
         {randomWords.length}
-        {setLetters()}
-
-
-
         <p id='textToBeCompleted' style={{color:'orange'}}><span id='completedLetters'>{keyboard}</span>{randomWords}</p>
-        <p id='errorCount'>Errors: {error}</p>
-        <p>Accuracy: {accuracy}%</p>
       </div>
     </>
   )
 }
 
-function Letter(props) {
-  return (
-    <>
-      <span key={props.key} style={{ color: props.color }}>{props.value}</span>
-    </>
-  )
-}
-
 export default App;
+
+
+// <p>Error: {error}</p>
+//         <p>Accuracy: {accuracy}%</p>
+  //My code tdoes not work at the moment and will need to be worked on to fix the bug and errors it contains within the code
+  //I am leaning how to type more accurately with using the backspace buutton
+  //   //We need to take input form out of the box of the input
+
+  //   //We take in the event add it to the new tag only if;
+  //   //it is a part of the first letter in the array of randomWords
+  //   //If Not
+  //   //Then we dont update any of the variables and output and error
+
+  //   //The error will be the current wrong letter turned RED.
+  // }
+ 
