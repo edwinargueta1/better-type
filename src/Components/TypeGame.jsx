@@ -9,30 +9,37 @@ export default function TypeGame({dictionary}) {
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
 
+  const [prevError, setPrevError] = useState(0);
+  const[prevAccuracy, setPrevAccuracy] = useState(0);
+
 
   //Will recalculate with every key stroke
   useEffect(() => {
-    calculateAccuracy();
+    calculateAccuracy(error, keyboard.length, setAccuracy);
   }, [keyboard]);
 
-  function calculateAccuracy() {
-    let newAccuracy = Number.isNaN((keyboard.length - error) / keyboard.length)
+  function calculateAccuracy(error, totalChars, setAccuracy) {
+    let newAccuracy = Number.isNaN((totalChars - error) / totalChars)
       ? 0
-      : (((keyboard.length - error) / keyboard.length) * 100).toFixed(2);
+      : (((totalChars - error) / totalChars) * 100).toFixed(2);
     let formated =
       newAccuracy % 1 === 0 ? Math.floor(newAccuracy) : newAccuracy;
     setAccuracy(formated);
   }
   return (
     <>
-    <StatsBar error={error} accuracy={accuracy} />
+    <StatsBar prevError={prevError} error={error} prevAccuracy={prevAccuracy} accuracy={accuracy} />
       <div id="textBox">
         <TextBox
           dictionary={dictionary}
           phraseRunTime={phraseRunTime}
+          error={error}
+          setError={setError}
+          accuracy={accuracy}
           keyboard={keyboard}
           setKeyboard={setKeyboard}
-          setError={setError}
+          setPrevError={setPrevError}
+          setPrevAccuracy={setPrevAccuracy}
         />
       </div>
     </>

@@ -3,9 +3,13 @@ import React, { useState, useEffect } from "react";
 export default function TextBox({
   dictionary,
   phraseRunTime,
+  error,
   setError,
+  accuracy,
   keyboard,
   setKeyboard,
+  setPrevError,
+  setPrevAccuracy
 }) {
   const [randomWords, setRandomWords] = useState([]);
   let onlyLetters = new RegExp("[A-Za-z\\s]");
@@ -81,6 +85,7 @@ export default function TextBox({
           curCharacter.char = randomWords[0];
           let newRandomWords = randomWords.slice(1);
           setKeyboard((prev) => [...prev, curCharacter]);
+          setError((prev) => (prev+1));
           setRandomWords(newRandomWords);
         }
       }
@@ -88,9 +93,12 @@ export default function TextBox({
 
     //If there is no more letters then restart
     if (randomWords.length <= 1) {
+      setPrevError(error);
+      setPrevAccuracy(accuracy);
       getRandomWords();
       setKeyboard([]);
       setError(0);
+
     }
   }
 
