@@ -8,13 +8,12 @@ export default function TextBox({
   setKeyboard,
 }) {
   const [randomWords, setRandomWords] = useState([]);
-  const [errorChar, setErrorChar] = useState();
-  const [repeated, setRepeated] = useState(false);
   let onlyLetters = new RegExp("[A-Za-z\\s]");
 
   function Letter(char) {
+    this.renderValue = char;
     this.char = char;
-    this.status = null;
+    this.status = 'untyped';
   }
 
   //Stores letters of random words in to an array
@@ -29,6 +28,7 @@ export default function TextBox({
       }
       newRandomWords.push(" ");
     }
+    newRandomWords.pop();
     setRandomWords(newRandomWords);
   }
 
@@ -52,47 +52,46 @@ export default function TextBox({
   }, [randomWords]);
 
   function handleKeyPress(event) {
+    let typedList = [...keyboard];
     let isValid =
       event.key.length === 1 &&
-      onlyLetters.test(event.key) &&
-      randomWords[0] === event.key;
+      onlyLetters.test(event.key);
 
-    let curError = errorChar;
-    let curCharacter = new Letter();
-    curCharacter.char = event.key;
-    curCharacter.status = "untyped";
-
-    // console.log(`${curError} and  ${event.key} Equality: ${curError === event.key} Empty: ${curError === ''}`)
-    //if the letter is valid
-    if (isValid) {
-      let newRandomWords = randomWords.slice(1);
-      curCharacter.status = "typed";
-      if (curCharacter.status !== "error") {
-        setKeyboard((prev) => [...prev, curCharacter]);
-      }
-      setRandomWords(newRandomWords);
-      setRepeated(false);
-
-      //If there is no more letters then restart
-      if (randomWords.length <= 2) {
-        getRandomWords();
-        setKeyboard([]);
-        setError(0);
-      }
-    } else {
-      curCharacter.status = "error";
-      curCharacter.char = randomWords[0];
-      curError = randomWords[0];
-
-      if (repeated === false) {
-        let newRandomWords = randomWords.slice(1);
-        setKeyboard((prev) => [...prev, curCharacter]);
-        setRandomWords(newRandomWords);
-        setError((prevError) => (prevError = prevError + 1));
-      }
-      setRepeated(true);
+    let curCharacter = new Letter(randomWords[0]);
+    if(curCharacter.char === ' '){
+      curCharacter.renderValue = '•';
     }
-    setErrorChar(curError);
+    
+    let lastInput = (typedList[typedList.length -1] !== undefined) ? typedList[typedList.length -1] : curCharacter;
+
+    if (isValid) {
+      if (lastInput.status === "error") {
+        if (lastInput.char === event.key) {
+          lastInput.status = "typedError";
+          setKeyboard(typedList);
+        }
+      } else {
+        if (randomWords[0] === event.key) {
+          let newRandomWords = randomWords.slice(1);
+          curCharacter.status = "typed";
+          setKeyboard((prev) => [...prev, curCharacter]);
+          setRandomWords(newRandomWords);
+        } else {
+          curCharacter.status = "error";
+          curCharacter.char = randomWords[0];
+          let newRandomWords = randomWords.slice(1);
+          setKeyboard((prev) => [...prev, curCharacter]);
+          setRandomWords(newRandomWords);
+        }
+      }
+    }
+
+    //If there is no more letters then restart
+    if (randomWords.length <= 1) {
+      getRandomWords();
+      setKeyboard([]);
+      setError(0);
+    }
   }
 
   return (
@@ -104,12 +103,17 @@ export default function TextBox({
               <React.Fragment key={index}>
                 {element.status === "typed" && (
                   <span key={index} style={{ color: "green" }}>
-                    {element.char}
+                    {element.renderValue}
                   </span>
                 )}
                 {element.status === "error" && (
                   <span key={index} style={{ color: "red" }}>
-                    {element.char}
+                    {element.renderValue}
+                  </span>
+                )}
+                {element.status === "typedError" && (
+                  <span key={index} style={{ color: "orange" }}>
+                    {element.renderValue}
                   </span>
                 )}
               </React.Fragment>
