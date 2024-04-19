@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function TextBox({
   dictionary,
+  phrase,
+  setPhrase,
   phraseRunTime,
   error,
   setError,
   accuracy,
-  keyboard,
-  setKeyboard,
   setPrevError,
   setPrevAccuracy
 }) {
-  const [randomWords, setRandomWords] = useState([]);
+  let [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   let onlyLetters = new RegExp("[A-Za-z\\s]");
 
   function Letter(char) {
@@ -20,116 +20,122 @@ export default function TextBox({
     this.status = 'untyped';
   }
 
+  const STATUS = {
+    UNTYPED: 'untyped',
+    TYPED: 'typed',
+    ERROR: 'error',
+    TYPED_ERROR: 'typedError'
+  }
+
   //Stores letters of random words in to an array
-  function getRandomWords() {
+  function getNewPhrase() {
     let newRandomWords = [];
     // console.log(`Dictionary: ${dictionary[0]}`);
     for (let i = 0; i < 10; i++) {
-      let randomIndex = Math.floor(Math.random() * 10000);
-      let word = dictionary[randomIndex];
-      for (let j = 0; j < word.length; j++) {
-        newRandomWords.push(word.charAt(j));
+      let randomDictionaryWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+      for (let j = 0; j < randomDictionaryWord.length; j++) {
+        newRandomWords.push(new Letter(randomDictionaryWord.charAt(j)));
       }
-      newRandomWords.push(" ");
+      newRandomWords.push(new Letter(" "));
     }
     newRandomWords.pop();
-    setRandomWords(newRandomWords);
+    setPhrase(newRandomWords);
   }
 
   //Calls the phrase to be genereated
   useEffect(() => {
     if (dictionary.length > 0) {
       // Call getRandomWords after setting dictionary
-      getRandomWords();
+      getNewPhrase();
     }
+    
   }, [dictionary]);
 
   //Event listener
   useEffect(() => {
-    // Add event listener when the component mounts
-    document.addEventListener("keydown", handleKeyPress);
+    if (phrase.length > 0) {
+      // Add event listener when the component mounts
+      document.addEventListener("keydown", handleKeyPress);
 
-    // Remove event listener when the component unmounts
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [randomWords]);
+      // Remove event listener when the component unmounts
+      return () => {
+        document.removeEventListener("keydown", handleKeyPress);
+      };
+    }
+  }, [phrase]);
 
   function handleKeyPress(event) {
-    let typedList = [...keyboard];
+    let curPhrase = [...phrase];
     let isValid =
       event.key.length === 1 &&
-      onlyLetters.test(event.key);
+      onlyLetters.test(event.key) &&
+      curPhrase.length > indexOfCurLetter;
+    console.log(indexOfCurLetter)
 
-    let curCharacter = new Letter(randomWords[0]);
-    if(curCharacter.char === ' '){
-      curCharacter.renderValue = '•';
-    }
-    
-    let lastInput = (typedList[typedList.length -1] !== undefined) ? typedList[typedList.length -1] : curCharacter;
 
     if (isValid) {
-      if (lastInput.status === "error") {
-        if (lastInput.char === event.key) {
-          lastInput.status = "typedError";
-          setKeyboard(typedList);
+      //if it already labeled as an error
+      if (curPhrase[indexOfCurLetter].status === STATUS.ERROR) {
+        if(curPhrase[indexOfCurLetter].char === event.key){
+          curPhrase[indexOfCurLetter].status = STATUS.TYPED_ERROR;
+          setIndexOfCurLetter(prev => prev + 1)
         }
       } else {
-        if (randomWords[0] === event.key) {
-          let newRandomWords = randomWords.slice(1);
-          curCharacter.status = "typed";
-          setKeyboard((prev) => [...prev, curCharacter]);
-          setRandomWords(newRandomWords);
+        //if the character is equal to the input
+        if (curPhrase[indexOfCurLetter].char === event.key) {
+          curPhrase[indexOfCurLetter].status = STATUS.TYPED;
+          setIndexOfCurLetter(prev => prev + 1)
         } else {
-          curCharacter.status = "error";
-          curCharacter.char = randomWords[0];
-          let newRandomWords = randomWords.slice(1);
-          setKeyboard((prev) => [...prev, curCharacter]);
-          setError((prev) => (prev+1));
-          setRandomWords(newRandomWords);
+          curPhrase[indexOfCurLetter].status = STATUS.ERROR;
+          setError(prev => prev + 1)
+          
         }
       }
+      setPhrase(curPhrase);
     }
-
+    
     //If there is no more letters then restart
-    if (randomWords.length <= 1) {
+    console.log(`pL: ${phrase.length}  and  i: ${indexOfCurLetter}`)
+    if (phrase.length-1 <= indexOfCurLetter) {
       setPrevError(error);
       setPrevAccuracy(accuracy);
-      getRandomWords();
-      setKeyboard([]);
+      setIndexOfCurLetter(0)
+      getNewPhrase();
       setError(0);
-
     }
   }
 
   return (
-    <>
-      <div>
-        <p>
-          {keyboard.map((element, index) => {
-            return (
-              <React.Fragment key={index}>
-                {element.status === "typed" && (
-                  <span key={index} style={{ color: "green" }}>
-                    {element.renderValue}
-                  </span>
-                )}
-                {element.status === "error" && (
-                  <span key={index} style={{ color: "red" }}>
-                    {element.renderValue}
-                  </span>
-                )}
-                {element.status === "typedError" && (
-                  <span key={index} style={{ color: "orange" }}>
-                    {element.renderValue}
-                  </span>
-                )}
-              </React.Fragment>
-            );
-          })}
-          {randomWords}
-        </p>
-      </div>
-    </>
+    <div id="textBoxWrapper">
+      <p>
+        {phrase.map((element, index) => {
+          return (
+            <React.Fragment key={index}>
+              {element.status === "untyped" && (
+                <span key={index} id="untyped">
+                  {element.renderValue}
+                </span>
+              )}
+              {element.status === "typed" && (
+                <span key={index} id="typedText">
+                  {element.renderValue}
+                </span>
+              )}
+              {element.status === "error" && (
+                <span key={index} id="errorText">
+                  {element.renderValue}
+                </span>
+              )}
+              {element.status === "typedError" && (
+                <span key={index} id="typedErrorText">
+                  {element.renderValue}
+                </span>
+              )}
+            </React.Fragment>
+          );
+        })}
+
+      </p>
+    </div>
   );
 }

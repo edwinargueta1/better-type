@@ -29,10 +29,10 @@ function App() {
   return (
     <div className="App">
       <div id="background">
-        <div id="stats">
-          <TypeGame dictionary={dictionary}/>
+        <div className="title">
+          <h1>Better Type</h1>
         </div>
-        
+        <TypeGame dictionary={dictionary} />
       </div>
     </div>
   );

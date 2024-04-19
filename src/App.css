@@ -1,37 +1,87 @@
+:root{
+  --backgroundColor: rgb(45, 45, 45);
+  --menuBackgroundColor: rgba(0, 0, 0, 0.25);
+  --textColor: rgb(131, 131, 131);
+  --textCorrectColor: rgb(196, 196, 196);
+  --textIncorrectColor: rgb(187, 21, 21);
+  --textCorrectedColor: rgb(190, 110, 4);
+  --primaryColor:rgb(34, 116, 34);
+  --secondaryColor: rgb(46, 134, 38);
+  background-color: var(--backgroundColor);
+}
+
 *{
   padding: 0px;
   margin: 0px;
+}
+p{
+  /* background-color: black; */
+  font-size: 16px;
+  font-family:'Arial Narrow', Arial, sans-serif;
+  color: var(--textColor);
+  white-space-collapse: preserve-spaces;
 }
 .App{
   text-align: center;
 }
 #background{
-  background-color: rgb(37, 37, 37);
+  background-color: var(--backgroundColor);
   height: 100vh;
   width:100%;
+  /* display: grid; */
+  /* place-items: center; */
+}
+.title{
+  /* background-color: red; */
+  padding-top: 50px;
+  padding-bottom: 15px;
+  color: var(--primaryColor);
+}
+#textBoxWrapper{
+  display: flex;
+  margin: auto;
+  border: solid black 1px;
+  padding: 10px;
+  /* grid-template-rows: auto 1fr; */
+  /* max-width: 1000px; */
+  letter-spacing: 2px;
+}
+#textBoxWrapper p{
+  font-size: 25px;
+}
+#gameWrapper{
+  /* place-items: center; */
+  display: flex;
+  margin: auto;
+  flex-direction: column;
+  border: red 1px solid;
+  height: 700px;
+  width: 1000px;
+  aspect-ratio: 16/13;
+}
+#statBarAreaWrapper{
+  height: 50px;
   display: grid;
-  place-items: center;
+  align-items: center;
 }
-#text{
-  
+#statBar{
+  display: flex;
+  background-color: var(--menuBackgroundColor);
+  border-radius: 16px;
+  padding: 10px;
+  width: fit-content;
+  margin: auto;
 }
-p{
-  /* background-color: black; */
-  font-size: larger;
-  color: white;
-  white-space-collapse: preserve-spaces;
+#statBar p{
+  padding-left: 5px;
+  padding-right: 5px;
 }
-input{
-  /* background: black; */
-  border: none;
-  color:wheat;
+#typedText{
+  color: var(--textCorrectColor);
 }
-#completedLetters{
-  color:rgb(45, 119, 184);
+#errorText{
+  color: var(--textIncorrectColor);
 }
-#textToBeCompleted{
-  color: grey;
-}
-#errorCount{
-  color:rgb(223, 0, 0);
+#typedErrorText{
+  color: var(--textCorrectedColor);
 }

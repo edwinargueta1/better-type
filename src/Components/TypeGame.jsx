@@ -4,7 +4,7 @@ import StatsBar from "./StatsBar";
 
 export default function TypeGame({dictionary}) {
 
-  const [keyboard, setKeyboard] = useState([]);
+  const [phrase, setPhrase] = useState([]);
   const [phraseRunTime, setPhraseRunTime] = useState(0);
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
@@ -15,8 +15,8 @@ export default function TypeGame({dictionary}) {
 
   //Will recalculate with every key stroke
   useEffect(() => {
-    calculateAccuracy(error, keyboard.length, setAccuracy);
-  }, [keyboard]);
+    calculateAccuracy(error, phrase.length, setAccuracy);
+  }, [phrase]);
 
   function calculateAccuracy(error, totalChars, setAccuracy) {
     let newAccuracy = Number.isNaN((totalChars - error) / totalChars)
@@ -27,21 +27,19 @@ export default function TypeGame({dictionary}) {
     setAccuracy(formated);
   }
   return (
-    <>
+    <div id="gameWrapper">
     <StatsBar prevError={prevError} error={error} prevAccuracy={prevAccuracy} accuracy={accuracy} />
-      <div id="textBox">
         <TextBox
           dictionary={dictionary}
+          phrase={phrase}
+          setPhrase={setPhrase}
           phraseRunTime={phraseRunTime}
           error={error}
           setError={setError}
           accuracy={accuracy}
-          keyboard={keyboard}
-          setKeyboard={setKeyboard}
           setPrevError={setPrevError}
           setPrevAccuracy={setPrevAccuracy}
         />
-      </div>
-    </>
+    </div>
   );
 }
