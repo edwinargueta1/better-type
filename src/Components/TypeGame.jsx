@@ -28,18 +28,25 @@ export default function TypeGame({dictionary}) {
   }
   return (
     <div id="gameWrapper">
-    <StatsBar prevError={prevError} error={error} prevAccuracy={prevAccuracy} accuracy={accuracy} />
-        <TextBox
-          dictionary={dictionary}
-          phrase={phrase}
-          setPhrase={setPhrase}
-          phraseRunTime={phraseRunTime}
-          error={error}
-          setError={setError}
-          accuracy={accuracy}
-          setPrevError={setPrevError}
-          setPrevAccuracy={setPrevAccuracy}
-        />
+      <StatsBar
+        prevError={prevError}
+        error={error}
+        prevAccuracy={prevAccuracy}
+        accuracy={accuracy}
+        phraseRunTime={phraseRunTime}
+      />
+      <TextBox
+        dictionary={dictionary}
+        phrase={phrase}
+        setPhrase={setPhrase}
+        phraseRunTime={phraseRunTime}
+        error={error}
+        setError={setError}
+        accuracy={accuracy}
+        setPrevError={setPrevError}
+        setPrevAccuracy={setPrevAccuracy}
+        setPhraseRunTime={setPhraseRunTime}
+      />
     </div>
   );
 }

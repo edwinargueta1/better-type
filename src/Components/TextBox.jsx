@@ -1,21 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function TextBox({
   dictionary,
   phrase,
   setPhrase,
-  phraseRunTime,
   error,
   setError,
   accuracy,
   setPrevError,
-  setPrevAccuracy
+  setPrevAccuracy,
+  setPhraseRunTime
 }) {
+  //Component level Variables
+  let [timerIsActive, setTimerIsActive] = useState(false);
   let [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   let onlyLetters = new RegExp("[A-Za-z\\s]");
 
   function Letter(char) {
-    this.renderValue = char;
+    this.renderValue = (char === " ") ? "-" : char;
     this.char = char;
     this.status = 'untyped';
   }
@@ -30,7 +32,6 @@ export default function TextBox({
   //Stores letters of random words in to an array
   function getNewPhrase() {
     let newRandomWords = [];
-    // console.log(`Dictionary: ${dictionary[0]}`);
     for (let i = 0; i < 10; i++) {
       let randomDictionaryWord = dictionary[Math.floor(Math.random() * dictionary.length)];
       for (let j = 0; j < randomDictionaryWord.length; j++) {
@@ -42,35 +43,50 @@ export default function TextBox({
     setPhrase(newRandomWords);
   }
 
-  //Calls the phrase to be genereated
+  //Generates a phrase after dictionary get built
   useEffect(() => {
     if (dictionary.length > 0) {
-      // Call getRandomWords after setting dictionary
       getNewPhrase();
     }
-    
   }, [dictionary]);
 
-  //Event listener
+  //Event listener for keyboard input
   useEffect(() => {
     if (phrase.length > 0) {
       // Add event listener when the component mounts
       document.addEventListener("keydown", handleKeyPress);
 
-      // Remove event listener when the component unmounts
+      // Remove
       return () => {
         document.removeEventListener("keydown", handleKeyPress);
       };
     }
   }, [phrase]);
 
+  //Timer runs when it is active
+  useEffect(()=> {
+    let interval;
+    if(timerIsActive){
+      interval = setInterval(()=>{
+        setPhraseRunTime((prevRuntime) => prevRuntime + 1)
+      }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  },[timerIsActive])
+
   function handleKeyPress(event) {
+    if(timerIsActive === false){
+      setTimerIsActive((prev) => !prev);
+      setPhraseRunTime(0);
+    }
     let curPhrase = [...phrase];
     let isValid =
       event.key.length === 1 &&
       onlyLetters.test(event.key) &&
       curPhrase.length > indexOfCurLetter;
-    console.log(indexOfCurLetter)
 
 
     if (isValid) {
@@ -88,15 +104,13 @@ export default function TextBox({
         } else {
           curPhrase[indexOfCurLetter].status = STATUS.ERROR;
           setError(prev => prev + 1)
-          
         }
       }
       setPhrase(curPhrase);
     }
-    
-    //If there is no more letters then restart
-    console.log(`pL: ${phrase.length}  and  i: ${indexOfCurLetter}`)
+    //Reset if finished
     if (phrase.length-1 <= indexOfCurLetter) {
+      setTimerIsActive((prev) => !prev);
       setPrevError(error);
       setPrevAccuracy(accuracy);
       setIndexOfCurLetter(0)

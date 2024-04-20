@@ -1,4 +1,4 @@
-export default function StatsBar({ prevError, error, prevAccuracy, accuracy }) {
+export default function StatsBar({ prevError, error, prevAccuracy, accuracy, phraseRunTime }) {
   return (
     <div id="statBarAreaWrapper">
       <div id="statBar">
@@ -7,6 +7,7 @@ export default function StatsBar({ prevError, error, prevAccuracy, accuracy }) {
         <p>Errors: {prevError} </p>
         <p>Errors: {error}</p>
         <p>Accuracy: {accuracy}%</p>
+        <p>Time: {phraseRunTime}</p>
       </div>
     </div>
   );
