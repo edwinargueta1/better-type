@@ -7,7 +7,7 @@ export default function StatsBar({ prevError, error, prevAccuracy, accuracy, phr
         <p>Errors: {prevError} </p>
         <p>Errors: {error}</p>
         <p>Accuracy: {accuracy}%</p>
-        <p>Time: {phraseRunTime}</p>
+        <p>Time: {(phraseRunTime/1000).toFixed(2)}</p>
       </div>
     </div>
   );

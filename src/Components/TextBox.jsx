@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function TextBox({
   dictionary,
@@ -13,6 +13,8 @@ export default function TextBox({
 }) {
   //Component level Variables
   let [timerIsActive, setTimerIsActive] = useState(false);
+  let [phraseStartTime, setPhraseStartTime] = useState(null);
+  let frameRef = useRef();
   let [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   let onlyLetters = new RegExp("[A-Za-z\\s]");
 
@@ -63,24 +65,25 @@ export default function TextBox({
     }
   }, [phrase]);
 
+  function updateTime(){
+    const currentTime = performance.now();
+    const elapsedTime = currentTime - phraseStartTime;
+    setPhraseRunTime(elapsedTime);
+    frameRef.current = requestAnimationFrame(updateTime);
+  }
+
   //Timer runs when it is active
   useEffect(()=> {
-    let interval;
-    if(timerIsActive){
-      interval = setInterval(()=>{
-        setPhraseRunTime((prevRuntime) => prevRuntime + 1)
-      }, 1000)
-    }
-
-    return () => {
-      clearInterval(interval);
-    };
-  },[timerIsActive])
+    if(phraseStartTime === null) return;
+    frameRef.current = requestAnimationFrame(updateTime);
+    return () => cancelAnimationFrame(frameRef.current);
+  },[phraseStartTime])
 
   function handleKeyPress(event) {
-    if(timerIsActive === false){
-      setTimerIsActive((prev) => !prev);
+    if(phraseStartTime === null){
+      // setTimerIsActive((prev) => !prev);
       setPhraseRunTime(0);
+      setPhraseStartTime(performance.now());
     }
     let curPhrase = [...phrase];
     let isValid =
@@ -110,7 +113,7 @@ export default function TextBox({
     }
     //Reset if finished
     if (phrase.length-1 <= indexOfCurLetter) {
-      setTimerIsActive((prev) => !prev);
+      setPhraseStartTime(null);
       setPrevError(error);
       setPrevAccuracy(accuracy);
       setIndexOfCurLetter(0)

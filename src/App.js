@@ -1,6 +1,7 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import TypeGame from "./Components/TypeGame.jsx";
+import Timer from "./Components/timerTest.jsx";
 
 
 function App() {
@@ -33,6 +34,8 @@ function App() {
           <h1>Better Type</h1>
         </div>
         <TypeGame dictionary={dictionary} />
+
+        <Timer/>
       </div>
     </div>
   );
