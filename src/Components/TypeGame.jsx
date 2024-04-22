@@ -10,11 +10,6 @@ export default function TypeGame({dictionary}) {
   const [accuracy, setAccuracy] = useState(100);
   const [wordsPerMin, setWordsPerMin] = useState(0);
 
-  //Remove prev values not Needed
-  const [prevError, setPrevError] = useState(0);
-  const[prevAccuracy, setPrevAccuracy] = useState(0);
-
-
   //Will recalculate with every key stroke
   useEffect(() => {
     calculateAccuracy(error, phrase.length, setAccuracy);
@@ -31,9 +26,7 @@ export default function TypeGame({dictionary}) {
   return (
     <div id="gameWrapper">
       <StatsBar
-        prevError={prevError}
         error={error}
-        prevAccuracy={prevAccuracy}
         accuracy={accuracy}
         phraseRunTime={phraseRunTime}
         wordsPerMin={wordsPerMin}
@@ -46,8 +39,6 @@ export default function TypeGame({dictionary}) {
         error={error}
         setError={setError}
         accuracy={accuracy}
-        setPrevError={setPrevError}
-        setPrevAccuracy={setPrevAccuracy}
         setWordsPerMin={setWordsPerMin}
       />
     </div>
