@@ -8,7 +8,9 @@ export default function TypeGame({dictionary}) {
   const [phraseRunTime, setPhraseRunTime] = useState(0);
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
+  const [wordsPerMin, setWordsPerMin] = useState(0);
 
+  //Remove prev values not Needed
   const [prevError, setPrevError] = useState(0);
   const[prevAccuracy, setPrevAccuracy] = useState(0);
 
@@ -34,18 +36,19 @@ export default function TypeGame({dictionary}) {
         prevAccuracy={prevAccuracy}
         accuracy={accuracy}
         phraseRunTime={phraseRunTime}
+        wordsPerMin={wordsPerMin}
       />
       <TextBox
         dictionary={dictionary}
         phrase={phrase}
         setPhrase={setPhrase}
-        phraseRunTime={phraseRunTime}
+        setPhraseRunTime={setPhraseRunTime}
         error={error}
         setError={setError}
         accuracy={accuracy}
         setPrevError={setPrevError}
         setPrevAccuracy={setPrevAccuracy}
-        setPhraseRunTime={setPhraseRunTime}
+        setWordsPerMin={setWordsPerMin}
       />
     </div>
   );

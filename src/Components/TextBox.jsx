@@ -7,15 +7,16 @@ export default function TextBox({
   error,
   setError,
   accuracy,
-  setPrevError,
-  setPrevAccuracy,
-  setPhraseRunTime
+  setPrevError, //Remove prev values not Needed
+  setPrevAccuracy, //<<<
+  setPhraseRunTime,
+  setWordsPerMin
 }) {
   //Component level Variables
-  let [timerIsActive, setTimerIsActive] = useState(false);
   let [phraseStartTime, setPhraseStartTime] = useState(null);
   let frameRef = useRef();
   let [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
+  let [completedWords, setCompletedWords] = useState(0);
   let onlyLetters = new RegExp("[A-Za-z\\s]");
 
   function Letter(char) {
@@ -65,23 +66,46 @@ export default function TextBox({
     }
   }, [phrase]);
 
-  function updateTime(){
-    const currentTime = performance.now();
-    const elapsedTime = currentTime - phraseStartTime;
-    setPhraseRunTime(elapsedTime);
-    frameRef.current = requestAnimationFrame(updateTime);
-  }
+  // //Debugging
+  // useEffect(() => {
+  //   console.log(completedWords);
+  // }, [completedWords])
+
+  // function updateTime(){
+  //   const currentTime = performance.now();
+  //   const elapsedTime = currentTime - phraseStartTime;
+  //   setPhraseRunTime(elapsedTime);
+  //   updateWordsPerMin(elapsedTime);
+  //   frameRef.current = requestAnimationFrame(updateTime);
+  // }
+  // function updateWordsPerMin(elapsedTime){
+  //   let curCompletedWords = completedWords;
+  //   let wpm = curCompletedWords/(elapsedTime/60);
+  //   console.log();
+  //   setWordsPerMin(wpm);
+  // }
 
   //Timer runs when it is active
   useEffect(()=> {
     if(phraseStartTime === null) return;
-    frameRef.current = requestAnimationFrame(updateTime);
-    return () => cancelAnimationFrame(frameRef.current);
-  },[phraseStartTime])
+    // frameRef.current = requestAnimationFrame(updateTime);
+    //Updating the time
+    let interval = setInterval(()=>{
+      let curTime = performance.now();
+      let elapsedTimeInSec = (curTime - phraseStartTime)/1000;
+      // console.log(`Formula:  ${completedWords}/${elapsedTimeInSec} * 60  = ${((completedWords) / elapsedTimeInSec)*60}`)
+      setPhraseRunTime(() => {
+        return curTime - phraseStartTime;
+      })
+      setWordsPerMin(() => {
+        return (((completedWords) / elapsedTimeInSec)*60).toFixed(1);
+      });
+    }, 100)
+    return () => clearInterval(interval);
+  },[phraseStartTime, completedWords])
 
   function handleKeyPress(event) {
     if(phraseStartTime === null){
-      // setTimerIsActive((prev) => !prev);
       setPhraseRunTime(0);
       setPhraseStartTime(performance.now());
     }
@@ -96,12 +120,16 @@ export default function TextBox({
       //if it already labeled as an error
       if (curPhrase[indexOfCurLetter].status === STATUS.ERROR) {
         if(curPhrase[indexOfCurLetter].char === event.key){
+          // console.log(curPhrase[indexOfCurLetter].char === " ")
+          if(curPhrase[indexOfCurLetter].char === " "){setCompletedWords(prev => prev + 1)};
           curPhrase[indexOfCurLetter].status = STATUS.TYPED_ERROR;
           setIndexOfCurLetter(prev => prev + 1)
         }
       } else {
         //if the character is equal to the input
         if (curPhrase[indexOfCurLetter].char === event.key) {
+          // console.log(curPhrase[indexOfCurLetter].char === " ");
+          if(curPhrase[indexOfCurLetter].char === " "){setCompletedWords(prev => prev + 1)};
           curPhrase[indexOfCurLetter].status = STATUS.TYPED;
           setIndexOfCurLetter(prev => prev + 1)
         } else {
