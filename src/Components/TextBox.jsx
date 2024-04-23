@@ -89,6 +89,7 @@ export default function TextBox({
       //Resetting Variables
       setPhraseRunTime(0);
       setError(0);
+      setCompletedWords(0);
       setPhraseStartTime(performance.now());
     }
     let curPhrase = [...phrase];

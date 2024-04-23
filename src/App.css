@@ -24,18 +24,15 @@ p{
 .App{
   text-align: center;
 }
-#background{
-  background-color: var(--backgroundColor);
-  height: 100vh;
-  width:100%;
-  /* display: grid; */
-  /* place-items: center; */
-}
 .title{
-  /* background-color: red; */
-  padding-top: 50px;
-  padding-bottom: 15px;
+  display: flex;
+  align-items: center;
+  margin-top: 50px;
+  margin-bottom: 15px;
   color: var(--textColor);
+  /* border: solid 1px red; */
+
+  justify-content: space-between;
 }
 #textBoxWrapper{
   display: flex;
@@ -47,7 +44,7 @@ p{
   letter-spacing: 2px;
 }
 #textBoxWrapper p{
-  font-size: 25px;
+  font-size: 30px;
 }
 #gameWrapper{
   /* place-items: center; */
@@ -63,12 +60,15 @@ p{
   height: 50px;
   display: grid;
   align-items: center;
+  /* background-color: red; */
 }
 #statBar{
   display: flex;
   background-color: var(--menuBackgroundColor);
   border-radius: 16px;
   padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
   width: fit-content;
   margin: auto;
 }
@@ -84,4 +84,70 @@ p{
 }
 #typedErrorText{
   color: var(--textCorrectedColor);
+}
+
+.spacer{
+  flex:1;
+}
+
+.titleName {
+  margin: auto;
+  align-self: center;
+  flex:1;
+}
+
+.menuBackground{
+  flex: 1;
+  
+  margin: 10px;
+  height: 60px;
+  display: flex;
+  margin-left: auto;
+}
+.menuBackground .profileContainer{
+  display: flex;
+  background: linear-gradient(90deg, var(--menuBackgroundColor) 60%, var(--backgroundColor));
+  border-radius: 16px;
+  flex-direction: row;
+  margin:auto;
+  justify-content: center;
+  /* border: red solid 1px; */
+  padding-right: 10px;
+}
+.menuBackground img{
+  height: fit-content;
+  /* padding: 100%; */
+  
+  text-align: center;
+  justify-content: center;
+}
+.menuBackground .accountName{
+  /* padding:i; */
+  display: flex;
+  /* border: red 1px solid; */
+  align-items: center;
+  padding: 5px;
+  padding-right: 30px;
+  padding-left: 15px;
+}
+.menuBackground button {
+  width: 40px;
+  aspect-ratio: 1;
+  border: none;
+  margin: 5px;
+  padding: 5px;
+  background-color: transparent;
+  background-size: cover;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+}
+.menuBackground .loginButton{
+  background-image: url("/public/login-icon.png");
+}
+.menuBackground .signUpButton{
+  background-image: url("/public/register-icon.png");
+}
+.menuBackground button:hover{
+  cursor:pointer;
 }

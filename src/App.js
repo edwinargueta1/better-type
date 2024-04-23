@@ -1,6 +1,7 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import TypeGame from "./Components/TypeGame.jsx";
+import Profile from "./Components/Profile.jsx";
 
 
 function App() {
@@ -28,12 +29,12 @@ function App() {
 
   return (
     <div className="App">
-      <div id="background">
         <div className="title">
-          <h1>Better Type</h1>
+          <div className="spacer"></div>
+          <h1 className="titleName">Better Type</h1>
+          <Profile/>
         </div>
         <TypeGame dictionary={dictionary} />
-      </div>
     </div>
   );
 }
