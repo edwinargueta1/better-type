@@ -3,12 +3,32 @@ import TextBox from "./TextBox";
 import StatsBar from "./StatsBar";
 
 export default function TypeGame({dictionary}) {
-
   const [phrase, setPhrase] = useState([]);
   const [phraseRunTime, setPhraseRunTime] = useState(0);
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
   const [wordsPerMin, setWordsPerMin] = useState(0);
+
+  function Letter(char) {
+    this.renderValue = char === " " ? "-" : char;
+    this.char = char;
+    this.status = "untyped";
+  }
+
+  //Stores letters of random words in to an array
+  function getNewPhrase() {
+    let newRandomWords = [];
+    for (let i = 0; i < 10; i++) {
+      let randomDictionaryWord =
+        dictionary[Math.floor(Math.random() * dictionary.length)];
+      for (let j = 0; j < randomDictionaryWord.length; j++) {
+        newRandomWords.push(new Letter(randomDictionaryWord.charAt(j)));
+      }
+      newRandomWords.push(new Letter(" "));
+    }
+    newRandomWords.pop();
+    setPhrase(newRandomWords);
+  }
 
   //Will recalculate with every key stroke
   useEffect(() => {
@@ -35,12 +55,16 @@ export default function TypeGame({dictionary}) {
         dictionary={dictionary}
         phrase={phrase}
         setPhrase={setPhrase}
+        getNewPhrase={getNewPhrase}
         setPhraseRunTime={setPhraseRunTime}
         error={error}
         setError={setError}
         accuracy={accuracy}
         setWordsPerMin={setWordsPerMin}
       />
+      <button className="newPhraseButton" onClick={getNewPhrase}>
+        New Phrase
+      </button>
     </div>
   );
 }
