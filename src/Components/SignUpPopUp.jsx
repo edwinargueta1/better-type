@@ -1,14 +1,47 @@
 import { useState } from "react";
+import { auth } from "../config/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
 
+  const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const [signUpError, setSignUpError] = useState("");
   const [newUser, setNewUser] = useState({ username : "", email: "", password: "", reEnterPassword: ""});
 
-  function submit(event) {
-    event.preventDefault();
-    console.log(newUser);
+  function validSignUp(){
+    //Valid password
+    if(newUser.password.length < 8){
+      setSignUpError("Password must be 8 characters or longer.")
+      return false;
+    }
+    //If both passwords don't match
+    if(newUser.password !== newUser.reEnterPassword){
+      setSignUpError("Passwords do not match.")
+      return false;
+    }
+    //email needs too look like an email
+    if(!validEmailRegex.test(newUser.email)){
+      setSignUpError("Not a valid email format.")
+      return false;
+    }
+    return true;
   }
-  function validSignUp() {}
+
+  async function submit(event) {
+    event.preventDefault();
+    if(validSignUp()){
+      try{
+             await createUserWithEmailAndPassword(
+               auth,
+               newUser.email,
+               newUser.password
+             );
+      }catch(error){
+        console.error(error);
+      }
+    }
+  }
+
   return popUpState ? (
     <div
       className="popUpContainerOuter"
@@ -46,6 +79,7 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
         <button type="submit" onClick={submit}>
           Submit
         </button>
+        <p>{signUpError}</p>
       </form>
     </div>
   ) : (
