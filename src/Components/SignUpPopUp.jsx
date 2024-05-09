@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { auth, createNewUser, database } from "../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, doc, getDoc, query, where } from "firebase/firestore";
+import {  doc, getDoc } from "firebase/firestore";
 
 export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
   const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const [signUpError, setSignUpIndicator] = useState("");
   const [newUser, setNewUser] = useState({
-    username: "",
-    email: "",
-    password: "",
-    reEnterPassword: "",
+    username: "chub",
+    email: "mail@mail.com",
+    password: "cacaca",
+    reEnterPassword: "cacaca",
   });
 
   async function validSignUp() {
@@ -34,35 +34,53 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
       setSignUpIndicator("Not a valid email format.");
       return false;
     }
-    
-    const docSnapshot = await getDoc(doc(database, "Users", newUser.username));
-    if(docSnapshot.exists()){
+    //Username exits
+    const docRef = doc(database, "Users", newUser.username);
+    const doesDocumentExist = await getDoc(docRef);
+    if (doesDocumentExist.exists()) {
       setSignUpIndicator("Username already exists.");
       return false;
     }
+    
     return true;
   }
   async function signUpSuccess() {
-    await createUserWithEmailAndPassword(auth, newUser.email, newUser.password);
+    try{
+      console.log(newUser);
+      await createUserWithEmailAndPassword(
+        auth,
+        newUser.email,
+        newUser.password
+      );
 
-    const userData = {
-      userName: newUser.username,
-      email: newUser.email,
-      heightestWPM: 0,
-      averageWPM: 0,
-      lessons: 0,
-      totalWords: 0,
-      totalErrors: 0,
-      totalTime: 0,
-    };
-    createNewUser("Users", userData);
-    setSignUpIndicator(`User ${newUser.username} Created!`);
-    setNewUser({ username: "", email: "", password: "", reEnterPassword: "" });
+      const userData = {
+        userName: newUser.username,
+        email: newUser.email,
+        heightestWPM: 0,
+        averageWPM: 0,
+        lessons: 0,
+        totalWords: 0,
+        totalErrors: 0,
+        totalTime: 0,
+      };
+      createNewUser("Users", userData);
+      setSignUpIndicator(`User ${newUser.username} Created!`);
+      setNewUser({
+        username: "",
+        email: "",
+        password: "",
+        reEnterPassword: "",
+      });
+    }catch(error){
+      console.error(error);
+      setSignUpIndicator("Email already in use.");
+    }
   }
 
   async function submit(event) {
     event.preventDefault();
     if (await validSignUp()) {
+      console.log("valid")
       try {
         signUpSuccess();
       } catch (error) {

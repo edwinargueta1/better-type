@@ -28,14 +28,16 @@ export const googleProvider = new GoogleAuthProvider();
 export const database = getFirestore(app);
 
 //Dev Mode
-// if (window.location.hostname.includes("127.0.0.1")) {
+if (
+  window.location.hostname.includes("127.0.0.1") ||
+  window.location.hostname.includes("localhost")
+) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(database, "127.0.0.1", 8080);
-  
-// }
+}
 //Dev Mode End
 
-export async function createNewUser(collectionName, data){
+export async function createNewUser(data){
     try{
       const docRef = await setDoc(doc(database, "Users", data.userName), data);
       console.log('Document Created with: ', docRef.id);
@@ -43,6 +45,3 @@ export async function createNewUser(collectionName, data){
       console.error(error);
     }
   }
-
-// console.log(getAuth());
-// console.log(getAuth().currentUser);
