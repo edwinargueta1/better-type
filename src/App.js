@@ -11,6 +11,7 @@ function App() {
   const [isSignUpActive, setIsSignUpActive] = useState(false);
   
   const [userName, setUserName] = useState('Guest');
+  const [user, setUser] = useState();
 
   function toggleState(variable, functionVariable){
     functionVariable(!variable)

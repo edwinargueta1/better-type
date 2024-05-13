@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { loginUser } from "../config/firebase";
 
 export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
 
-  const [user, setUser] = useState({username: "", password: ""});
+  const [user, setUser] = useState({email: "", password: ""});
 
-  function submit(event) {
+  async function login(event) {
     event.preventDefault();
-    console.log(user)
+    // console.log(user)
+    await loginUser(user.email, user.password);
   }
+
   return popUpState ? (
     <div
       className="popUpContainerOuter"
@@ -18,8 +21,8 @@ export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
         <br />
         <input
           placeholder="Email"
-          value={user.username}
-          onChange={(e) => setUser({ ...user, username: e.target.value})}
+          value={user.email}
+          onChange={(e) => setUser({ ...user, email: e.target.value})}
         ></input>
         <br />
         <input
@@ -29,7 +32,7 @@ export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
           onChange={(e) => setUser({ ...user, password: e.target.value })}
         ></input>
         <br />
-        <button type="submit" onClick={submit}>
+        <button type="submit" onClick={login}>
           Submit
         </button>
       </form>

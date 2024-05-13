@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { auth, createNewUser, database } from "../config/firebase";
+import { auth, createNewUserInFirebase, database } from "../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import {  doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
   const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validUsernameRegex = /^[A-Za-z0-9]+$/;
   const [signUpError, setSignUpIndicator] = useState("");
   const [newUser, setNewUser] = useState({
+    //Debugging values---------------------
     username: "chub",
     email: "mail@mail.com",
     password: "cacaca",
@@ -15,8 +17,8 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
 
   async function validSignUp() {
     //username too long
-    if(newUser.username.length > 16){
-      setSignUpIndicator("Username must be 16 characters or less.")
+    if (newUser.username.length > 16) {
+      setSignUpIndicator("Username must be 16 characters or less.");
       return false;
     }
     //Valid password
@@ -34,53 +36,66 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
       setSignUpIndicator("Not a valid email format.");
       return false;
     }
-    //Username exits
+    //Username length needs to be at least more that 0
+    if (newUser.username.length < 1) {
+      setSignUpIndicator("Username needs to be longer.");
+      return false;
+    }
+    //Username can't contain special characters
+    if (!validUsernameRegex.test(newUser.username)) {
+      setSignUpIndicator("Username must only have letter and numbers.");
+      return false;
+    }
+    //Username exists
     const docRef = doc(database, "Users", newUser.username);
     const doesDocumentExist = await getDoc(docRef);
     if (doesDocumentExist.exists()) {
       setSignUpIndicator("Username already exists.");
       return false;
     }
-    
+
     return true;
   }
+
   async function signUpSuccess() {
-    try{
+    try {
       console.log(newUser);
       await createUserWithEmailAndPassword(
         auth,
         newUser.email,
         newUser.password
       );
-
-      const userData = {
-        userName: newUser.username,
-        email: newUser.email,
-        heightestWPM: 0,
-        averageWPM: 0,
-        lessons: 0,
-        totalWords: 0,
-        totalErrors: 0,
-        totalTime: 0,
-      };
-      createNewUser("Users", userData);
-      setSignUpIndicator(`User ${newUser.username} Created!`);
-      setNewUser({
-        username: "",
-        email: "",
-        password: "",
-        reEnterPassword: "",
-      });
-    }catch(error){
+    } catch (error) {
       console.error(error);
       setSignUpIndicator("Email already in use.");
+      return;
     }
+
+    const userData = {
+      userName: newUser.username,
+      email: newUser.email,
+      heightestWPM: 0,
+      averageWPM: 0,
+      lessons: 0,
+      totalWords: 0,
+      totalErrors: 0,
+      totalTime: 0,
+    };
+    createNewUserInFirebase(userData);
+    setSignUpIndicator(`User ${newUser.username} Created!`);
+    setNewUser({
+      username: "",
+      email: "",
+      password: "",
+      reEnterPassword: "",
+    });
   }
+    
 
   async function submit(event) {
     event.preventDefault();
     if (await validSignUp()) {
-      console.log("valid")
+      console.log("valid");
       try {
         signUpSuccess();
       } catch (error) {

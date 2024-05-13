@@ -1,7 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import {getAuth, connectAuthEmulator} from 'firebase/auth'
+import {
+  getAuth,
+  connectAuthEmulator,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
 import { doc, setDoc, collection } from "firebase/firestore";
@@ -37,11 +42,23 @@ if (
 }
 //Dev Mode End
 
-export async function createNewUser(data){
-    try{
-      const docRef = await setDoc(doc(database, "Users", data.userName), data);
-      console.log('Document Created with: ', docRef.id);
-    }catch(error){
-      console.error(error);
-    }
+export async function createNewUserInFirebase(data) {
+  try {
+    const docRef = await setDoc(doc(database, "Users", data.userName), data);
+    console.log("Document Created with: ", docRef.id);
+  } catch (error) {
+    console.error(error);
   }
+}
+export async function loginUser(email, password) {
+  try {
+    console.log("login user ran");
+    const user = await signInWithEmailAndPassword(auth, email, password);
+    console.log(user);
+    const sobj = await signOut(auth);
+    console.log(sobj);
+  } catch (error) {
+    console.log(error);
+  }
+}
+export function logout() {}
