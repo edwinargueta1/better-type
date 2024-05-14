@@ -62,9 +62,7 @@ export default function TypeGame({dictionary}) {
         accuracy={accuracy}
         setWordsPerMin={setWordsPerMin}
       />
-      <button className="newPhraseButton" onClick={getNewPhrase}>
-        New Phrase
-      </button>
+      
     </div>
   );
 }

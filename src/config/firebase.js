@@ -6,6 +6,7 @@ import {
   connectAuthEmulator,
   signInWithEmailAndPassword,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
@@ -42,10 +43,13 @@ if (
 }
 //Dev Mode End
 
+function state(user){
+  // onAuthStateChanged(auth, user)
+}
 export async function createNewUserInFirebase(data) {
   try {
     const docRef = await setDoc(doc(database, "Users", data.userName), data);
-    console.log("Document Created with: ", docRef.id);
+    // console.log("Document Created with: ", docRef.id);
   } catch (error) {
     console.error(error);
   }
@@ -55,10 +59,11 @@ export async function loginUser(email, password) {
     console.log("login user ran");
     const user = await signInWithEmailAndPassword(auth, email, password);
     console.log(user);
-    const sobj = await signOut(auth);
-    console.log(sobj);
   } catch (error) {
     console.log(error);
   }
 }
-export function logout() {}
+export function logout(auth) {
+  signOut(auth);
+  console.log("Signed out.")
+}

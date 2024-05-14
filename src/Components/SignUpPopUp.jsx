@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { auth, createNewUserInFirebase, database } from "../config/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
 export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
@@ -36,9 +36,9 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
       setSignUpIndicator("Not a valid email format.");
       return false;
     }
-    //Username length needs to be at least more that 0
-    if (newUser.username.length < 1) {
-      setSignUpIndicator("Username needs to be longer.");
+    //Username length needs to be between 1 and 16 characters
+    if (newUser.username.length < 1 && newUser.username.length > 16) {
+      setSignUpIndicator("Username must be between 1 - 16 characters.");
       return false;
     }
     //Username can't contain special characters
@@ -60,11 +60,13 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
   async function signUpSuccess() {
     try {
       console.log(newUser);
-      await createUserWithEmailAndPassword(
+      const userCred = await createUserWithEmailAndPassword(
         auth,
         newUser.email,
         newUser.password
       );
+      await updateProfile(userCred.user, {displayName: newUser.username});
+      console.log(userCred);
     } catch (error) {
       console.error(error);
       setSignUpIndicator("Email already in use.");
@@ -82,7 +84,7 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
       totalTime: 0,
     };
     createNewUserInFirebase(userData);
-    setSignUpIndicator(`User ${newUser.username} Created!`);
+    setSignUpIndicator(`Successfully created: ${newUser.username}`);
     setNewUser({
       username: "",
       email: "",

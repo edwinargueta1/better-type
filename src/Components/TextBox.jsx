@@ -124,15 +124,7 @@ export default function TextBox({
 
   return (
     <div className="typingIndicatorOverlay">
-      {focused ? (
-        ""
-      ) : (
-        <p
-          className="indicator"
-        >
-          Click here to start typing!
-        </p>
-      )}
+      {focused ? "" : <p className="indicator">Click here to start typing!</p>}
       <div
         id="textBoxWrapper"
         style={{ filter: focused ? "none" : "blur(8px)" }}
@@ -168,6 +160,9 @@ export default function TextBox({
             );
           })}
         </p>
+        <button className="clearButton" onClick={getNewPhrase}>
+          New Phrase
+        </button>
       </div>
     </div>
   );

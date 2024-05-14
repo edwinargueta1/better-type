@@ -3,7 +3,10 @@ import { loginUser } from "../config/firebase";
 
 export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
 
-  const [user, setUser] = useState({email: "", password: ""});
+  const [user, setUser] = useState({
+    email: "mail@mail.com",
+    password: "cacaca",
+  });
 
   async function login(event) {
     event.preventDefault();

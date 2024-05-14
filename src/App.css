@@ -29,6 +29,10 @@ button{
   border-radius: 16px;
   padding: 5px;
 }
+/* DUBGUGG ERROR ---------------------- */
+.clearButton{
+  margin-top:20px  
+}
 .App{
   text-align: center;
 }
@@ -43,7 +47,7 @@ button{
   justify-content: space-between;
 }
 #textBoxWrapper{
-  display: flex;
+  /* display: flex; */
   margin: auto;
   /* border: solid black 1px; */
   padding: 10px;
@@ -87,9 +91,9 @@ button{
   width: 1000px;
   aspect-ratio: 16/13;
 }
-.newPhaseButton{
+/* .clearButton{
 
-}
+} */
 #statBarAreaWrapper{
   height: 50px;
   display: grid;
