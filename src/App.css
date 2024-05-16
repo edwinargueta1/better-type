@@ -1,6 +1,6 @@
 :root{
   --backgroundColor: rgb(45, 45, 45);
-  --menuBackgroundColor: rgba(0, 0, 0, 0.25);
+  --menuBackgroundColor: rgba(0, 0, 0, 0.4);
   --textColor: rgb(131, 131, 131);
   --textCorrectColor: rgb(196, 196, 196);
   --textIncorrectColor: rgb(187, 21, 21);
@@ -29,6 +29,19 @@ button{
   border-radius: 16px;
   padding: 5px;
 }
+table{
+  color:var(--textColor);
+  /* border: solid 2px; */
+  width:600px;
+  background-color: var(--menuBackgroundColor);
+  border-radius: 16px;
+}
+table .titleTableData{
+  
+  border-bottom:rgb(34, 116, 34) solid 1px;
+  
+}
+
 /* DUBGUGG ERROR ---------------------- */
 .clearButton{
   margin-top:20px  

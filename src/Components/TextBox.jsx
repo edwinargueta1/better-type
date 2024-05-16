@@ -8,13 +8,14 @@ export default function TextBox({
   setError,
   setPhraseRunTime,
   setWordsPerMin,
+  addNewPhraseData
 }) {
   //Component level Variables
   const [focused, setFocused] = useState(false);
   const [phraseStartTime, setPhraseStartTime] = useState(null);
   const [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   const [completedWords, setCompletedWords] = useState(1);
-  const onlyLetters = new RegExp("[A-Za-z\\s]");
+  const onlyLettersRegex = new RegExp("[A-Za-z\\s]");
 
   const STATUS = {
     UNTYPED: "untyped",
@@ -22,8 +23,6 @@ export default function TextBox({
     ERROR: "error",
     TYPED_ERROR: "typedError",
   };
-
-  
 
   //Generates a phrase after dictionary gets built
   useEffect(() => {
@@ -65,6 +64,8 @@ export default function TextBox({
     return () => clearInterval(interval);
   }, [phraseStartTime, completedWords]);
 
+  
+
   function handleKeyPress(event) {
     if (focused === false) return;
 
@@ -78,7 +79,7 @@ export default function TextBox({
     let curPhrase = [...phrase];
     let isValid =
       event.key.length === 1 &&
-      onlyLetters.test(event.key) &&
+      onlyLettersRegex.test(event.key) &&
       curPhrase.length > indexOfCurLetter;
 
     //Key Input Logic
@@ -110,6 +111,7 @@ export default function TextBox({
 
     //Reset if finished
     if (phrase.length - 1 <= indexOfCurLetter) {
+      addNewPhraseData();
       setPhraseStartTime(null);
       setIndexOfCurLetter(0);
       getNewPhrase();

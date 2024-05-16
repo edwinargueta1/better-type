@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TextBox from "./TextBox";
 import StatsBar from "./StatsBar";
+import DataTable from "./DataTable";
 
 export default function TypeGame({dictionary}) {
   const [phrase, setPhrase] = useState([]);
@@ -9,16 +10,35 @@ export default function TypeGame({dictionary}) {
   const [accuracy, setAccuracy] = useState(100);
   const [wordsPerMin, setWordsPerMin] = useState(0);
 
+  const [phraseHistoryData, setPhraseHistoryData] = useState([]);
+
   function Letter(char) {
     this.renderValue = char === " " ? "-" : char;
     this.char = char;
     this.status = "untyped";
   }
 
+  useEffect(()=>{
+    console.log(`Count ${phraseHistoryData.length}`)
+  },[phraseHistoryData])
+
+  function addNewPhraseData() {
+    const curPhraseData = {
+      WPM: wordsPerMin,
+      accuracy: accuracy,
+      errors: error,
+      phraseRunTime: phraseRunTime,
+      timeCompleted: new Date().toLocaleString()
+    };
+    const curPhraseHistoryData = [...phraseHistoryData];
+    curPhraseHistoryData.push(curPhraseData);
+    setPhraseHistoryData(curPhraseHistoryData);
+  }
+
   //Stores letters of random words in to an array
   function getNewPhrase() {
     let newRandomWords = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1; i++) {
       let randomDictionaryWord =
         dictionary[Math.floor(Math.random() * dictionary.length)];
       for (let j = 0; j < randomDictionaryWord.length; j++) {
@@ -61,8 +81,9 @@ export default function TypeGame({dictionary}) {
         setError={setError}
         accuracy={accuracy}
         setWordsPerMin={setWordsPerMin}
+        addNewPhraseData={addNewPhraseData}
       />
-      
+      <DataTable phraseHistoryData={phraseHistoryData}/>
     </div>
   );
 }

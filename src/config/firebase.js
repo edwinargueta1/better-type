@@ -43,9 +43,6 @@ if (
 }
 //Dev Mode End
 
-function state(user){
-  // onAuthStateChanged(auth, user)
-}
 export async function createNewUserInFirebase(data) {
   try {
     const docRef = await setDoc(doc(database, "Users", data.userName), data);
