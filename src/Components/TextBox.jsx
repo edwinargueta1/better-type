@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function TextBox({
   dictionary,
@@ -46,6 +46,7 @@ export default function TextBox({
 
   //Timer runs when it is active
   useEffect(() => {
+    console.log(`mounted`)
     if (phraseStartTime === null) return;
 
     //Updating the time
@@ -61,7 +62,14 @@ export default function TextBox({
       });
     }, 10);
 
-    return () => clearInterval(interval);
+    return () => {
+      console.log(`unmounted`)
+      addNewPhraseData();
+      setPhraseStartTime(null);
+      setIndexOfCurLetter(0);
+      getNewPhrase();
+      clearInterval(interval)
+    };
   }, [phraseStartTime, completedWords]);
 
   
@@ -76,14 +84,19 @@ export default function TextBox({
       setCompletedWords(0);
       setPhraseStartTime(performance.now());
     }
-    let curPhrase = [...phrase];
-    let isValid =
+    let curPhrase = [...phrase];  ///Indexing error!
+    let isValidInput =
       event.key.length === 1 &&
-      onlyLettersRegex.test(event.key) &&
-      curPhrase.length > indexOfCurLetter;
+      onlyLettersRegex.test(event.key);
+    // console.log(
+    //   `keyLeng: ${event.key.length === 1} regex: ${onlyLettersRegex.test(
+    //     event.key
+    //   )}  inbounds: ${curPhrase.length > indexOfCurLetter}`
+    // );
+    // console.log(isValidInput)
 
     //Key Input Logic
-    if (isValid) {
+    if (isValidInput) {
       //if it already labeled as an error
       if (curPhrase[indexOfCurLetter].status === STATUS.ERROR) {
         if (curPhrase[indexOfCurLetter].char === event.key) {
@@ -96,6 +109,8 @@ export default function TextBox({
       } else {
         //if the character is equal to the input
         if (curPhrase[indexOfCurLetter].char === event.key) {
+          setPhrase(curPhrase);
+          //if Space
           if (curPhrase[indexOfCurLetter].char === " ") {
             setCompletedWords((prev) => prev + 1);
           }
@@ -104,19 +119,24 @@ export default function TextBox({
         } else {
           curPhrase[indexOfCurLetter].status = STATUS.ERROR;
           setError((prev) => prev + 1);
+          return;
         }
       }
       setPhrase(curPhrase);
     }
-
     //Reset if finished
-    if (phrase.length - 1 <= indexOfCurLetter) {
-      addNewPhraseData();
-      setPhraseStartTime(null);
-      setIndexOfCurLetter(0);
-      getNewPhrase();
-    }
+      if (
+        indexOfCurLetter >= phrase.length - 1 &&
+        curPhrase[indexOfCurLetter].char === event.key
+      ) {
+        // console.log(
+        //   `index: ${indexOfCurLetter} phraselength-1: ${phrase.length - 1}`
+        // );
+        
+      }
+    // console.log(`phrase: ${phrase.map((e)=> {return e.char})} phraseStartTime: ${phraseStartTime} IndexofCur: ${indexOfCurLetter}`);
   }
+
   function isFocused() {
     setFocused(true);
   }

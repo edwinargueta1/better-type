@@ -17,9 +17,9 @@ export default function TypeGame({dictionary}) {
     this.char = char;
     this.status = "untyped";
   }
-
+  //Lesson Amount Tracking for Database 
   useEffect(()=>{
-    console.log(`Count ${phraseHistoryData.length}`)
+    // console.log(`Count ${phraseHistoryData.length}`)
   },[phraseHistoryData])
 
   function addNewPhraseData() {
