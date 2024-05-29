@@ -41,8 +41,8 @@ function App() {
         .then((res) => {
           return res.text();
         })
-        .then((stuff) => {
-          return stuff.split("\r\n");
+        .then((words) => {
+          return words.split("\r\n");
         })
         .catch((err) => {
           return `File  Not Found. ${err}`;
@@ -75,7 +75,6 @@ function App() {
           isSignUpActive={isSignUpActive}
           setIsSignUpActive={setIsSignUpActive}
           toggleState={toggleState}
-          
         />
       </div>
       <TypeGame dictionary={dictionary} />

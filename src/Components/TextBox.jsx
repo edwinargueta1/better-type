@@ -1,18 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function TextBox({
   dictionary,
   phrase,
   setPhrase,
   getNewPhrase,
-  setError,
   setPhraseRunTime,
+  error,
+  setError,
+  accuracy,
+  setAccuracy,
+  calculateAccuracy,
   setWordsPerMin,
   addNewPhraseData
 }) {
   //Component level Variables
   const [focused, setFocused] = useState(false);
-  const [phraseStartTime, setPhraseStartTime] = useState(null);
+  const phraseStartTime = useRef(null);
   const [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   const [completedWords, setCompletedWords] = useState(1);
   const onlyLettersRegex = new RegExp("[A-Za-z\\s]");
@@ -44,17 +48,15 @@ export default function TextBox({
     }
   }, [phrase, focused]);
 
-  //Timer runs when it is active
   useEffect(() => {
-    console.log(`mounted`)
-    if (phraseStartTime === null) return;
+    if (phraseStartTime.current === null) return;
 
     //Updating the time
     let interval = setInterval(() => {
       let curTime = performance.now();
-      let elapsedTimeInSec = (curTime - phraseStartTime) / 1000;
+      let elapsedTimeInSec = (curTime - phraseStartTime.current) / 1000;
       setPhraseRunTime(() => {
-        return curTime - phraseStartTime;
+        return curTime - phraseStartTime.current;
       });
       let offset = 1;
       setWordsPerMin(() => {
@@ -63,37 +65,37 @@ export default function TextBox({
     }, 10);
 
     return () => {
-      console.log(`unmounted`)
-      addNewPhraseData();
-      setPhraseStartTime(null);
-      setIndexOfCurLetter(0);
-      getNewPhrase();
-      clearInterval(interval)
+      clearInterval(interval);
     };
-  }, [phraseStartTime, completedWords]);
+  }, [phraseStartTime.current, completedWords]);
 
+  //Rerenders Accuracy
+  useEffect(() => {
+    if(phraseStartTime.current !== null){
+      setAccuracy(calculateAccuracy(error, phrase.length));
+    }
+  }, [indexOfCurLetter, error, phraseStartTime.current])
   
 
   function handleKeyPress(event) {
-    if (focused === false) return;
+    if (!focused) return;
 
-    if (phraseStartTime === null) {
+    let isValidInput =
+      event.key.length === 1 &&
+      onlyLettersRegex.test(event.key);
+
+      console.log(`phraseTime: ${phraseStartTime.current}   isValid: ${isValidInput}`)
+    if (phraseStartTime.current === null && isValidInput) {
+      console.log('error reset 1');
       //Resetting Variables
       setPhraseRunTime(0);
       setError(0);
       setCompletedWords(0);
-      setPhraseStartTime(performance.now());
+      setAccuracy(0);
+      phraseStartTime.current = performance.now();
     }
-    let curPhrase = [...phrase];  ///Indexing error!
-    let isValidInput =
-      event.key.length === 1 &&
-      onlyLettersRegex.test(event.key);
-    // console.log(
-    //   `keyLeng: ${event.key.length === 1} regex: ${onlyLettersRegex.test(
-    //     event.key
-    //   )}  inbounds: ${curPhrase.length > indexOfCurLetter}`
-    // );
-    // console.log(isValidInput)
+
+    let curPhrase = [...phrase];
 
     //Key Input Logic
     if (isValidInput) {
@@ -119,22 +121,39 @@ export default function TextBox({
         } else {
           curPhrase[indexOfCurLetter].status = STATUS.ERROR;
           setError((prev) => prev + 1);
+          console.log(`an error gained ${error}`)
           return;
         }
       }
       setPhrase(curPhrase);
     }
+
     //Reset if finished
-      if (
-        indexOfCurLetter >= phrase.length - 1 &&
-        curPhrase[indexOfCurLetter].char === event.key
-      ) {
-        // console.log(
-        //   `index: ${indexOfCurLetter} phraselength-1: ${phrase.length - 1}`
-        // );
-        
-      }
-    // console.log(`phrase: ${phrase.map((e)=> {return e.char})} phraseStartTime: ${phraseStartTime} IndexofCur: ${indexOfCurLetter}`);
+    if (
+      indexOfCurLetter >= phrase.length - 1 &&
+      curPhrase[indexOfCurLetter].char === event.key
+    ) {
+      const endTime = performance.now();
+      const totalTime = (endTime - phraseStartTime.current);  // Calculate in seconds
+      const wpm = ((completedWords + 1) / (totalTime / 1000)) * 60;
+
+      setWordsPerMin(wpm)
+      setPhraseRunTime(totalTime);  // This should set the correct time
+      getNewPhrase();
+      phraseStartTime.current = null;
+      addNewPhraseData(wpm, accuracy, error, totalTime);
+      setIndexOfCurLetter(0);
+    }
+  }
+
+  function resetParams(){
+    phraseStartTime.current = null;
+    setIndexOfCurLetter(0);
+    setError(0);
+    setAccuracy(100);
+    setPhraseRunTime(0);
+    setWordsPerMin(0);
+    setCompletedWords(0);
   }
 
   function isFocused() {
@@ -182,7 +201,10 @@ export default function TextBox({
             );
           })}
         </p>
-        <button className="clearButton" onClick={getNewPhrase}>
+        <button className="clearButton" onClick={() => {
+          getNewPhrase();
+          resetParams();
+        }}>
           New Phrase
         </button>
       </div>

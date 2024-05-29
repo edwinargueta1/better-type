@@ -17,17 +17,16 @@ export default function TypeGame({dictionary}) {
     this.char = char;
     this.status = "untyped";
   }
-  //Lesson Amount Tracking for Database 
-  useEffect(()=>{
-    // console.log(`Count ${phraseHistoryData.length}`)
-  },[phraseHistoryData])
 
-  function addNewPhraseData() {
+  function addNewPhraseData(wpm, acc, err, totalTime) {
+    //  console.log(`inData: ${phraseRunTime}`);
+     setAccuracy(calculateAccuracy(err, phrase.length));
+    //  console.log(`errors: ${err} / phrase.length: ${phrase.length}`)
     const curPhraseData = {
-      WPM: wordsPerMin,
+      WPM: wpm,
       accuracy: accuracy,
-      errors: error,
-      phraseRunTime: phraseRunTime,
+      errors: err,
+      phraseRunTime: totalTime,
       timeCompleted: new Date().toLocaleString()
     };
     const curPhraseHistoryData = [...phraseHistoryData];
@@ -38,7 +37,7 @@ export default function TypeGame({dictionary}) {
   //Stores letters of random words in to an array
   function getNewPhrase() {
     let newRandomWords = [];
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 2; i++) {
       let randomDictionaryWord =
         dictionary[Math.floor(Math.random() * dictionary.length)];
       for (let j = 0; j < randomDictionaryWord.length; j++) {
@@ -50,19 +49,15 @@ export default function TypeGame({dictionary}) {
     setPhrase(newRandomWords);
   }
 
-  //Will recalculate with every key stroke
-  useEffect(() => {
-    calculateAccuracy(error, phrase.length, setAccuracy);
-  }, [phrase]);
-
-  function calculateAccuracy(error, totalChars, setAccuracy) {
+  function calculateAccuracy(error, totalChars) {
     let newAccuracy = Number.isNaN((totalChars - error) / totalChars)
       ? 0
       : (((totalChars - error) / totalChars) * 100).toFixed(2);
     let formated =
       newAccuracy % 1 === 0 ? Math.floor(newAccuracy) : newAccuracy;
-    setAccuracy(formated);
+    return formated;
   }
+
   return (
     <div id="gameWrapper">
       <StatsBar
@@ -80,6 +75,8 @@ export default function TypeGame({dictionary}) {
         error={error}
         setError={setError}
         accuracy={accuracy}
+        setAccuracy={setAccuracy}
+        calculateAccuracy={calculateAccuracy}
         setWordsPerMin={setWordsPerMin}
         addNewPhraseData={addNewPhraseData}
       />
