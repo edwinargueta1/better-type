@@ -18,7 +18,7 @@ export default function TypeGame({dictionary}) {
     this.status = "untyped";
   }
 
-  function addNewPhraseData(wpm, acc, err, totalTime) {
+  function addNewPhraseData(wpm, err, totalTime) {
     //  console.log(`inData: ${phraseRunTime}`);
      setAccuracy(calculateAccuracy(err, phrase.length));
     //  console.log(`errors: ${err} / phrase.length: ${phrase.length}`)
@@ -32,6 +32,18 @@ export default function TypeGame({dictionary}) {
     const curPhraseHistoryData = [...phraseHistoryData];
     curPhraseHistoryData.push(curPhraseData);
     setPhraseHistoryData(curPhraseHistoryData);
+  }
+
+  useEffect(() => {
+    console.log(`localStorage`)
+    phraseDataToLocalStorage();
+  }, [phraseHistoryData])
+
+  function phraseDataToLocalStorage(){
+    // if(phraseHistoryData.length > 9){
+      //pop of the 1 value and store it to the browser
+      // window.localStorage.setItem('storedLessons', JSON.stringify(phraseHistoryData));
+    // }
   }
 
   //Stores letters of random words in to an array
@@ -74,9 +86,9 @@ export default function TypeGame({dictionary}) {
         setPhraseRunTime={setPhraseRunTime}
         error={error}
         setError={setError}
-        accuracy={accuracy}
         setAccuracy={setAccuracy}
         calculateAccuracy={calculateAccuracy}
+        wordsPerMin={wordsPerMin}
         setWordsPerMin={setWordsPerMin}
         addNewPhraseData={addNewPhraseData}
       />

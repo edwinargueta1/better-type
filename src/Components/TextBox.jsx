@@ -20,6 +20,7 @@ export default function TextBox({
   const [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   const [completedWords, setCompletedWords] = useState(1);
   const onlyLettersRegex = new RegExp("[A-Za-z\\s]");
+  const englishAverageWord = 5;
 
   const STATUS = {
     UNTYPED: "untyped",
@@ -58,9 +59,8 @@ export default function TextBox({
       setPhraseRunTime(() => {
         return curTime - phraseStartTime.current;
       });
-      let offset = 1;
       setWordsPerMin(() => {
-        return ((completedWords + offset) / elapsedTimeInSec) * 60;
+        return ((indexOfCurLetter/englishAverageWord) / elapsedTimeInSec) * 60;
       });
     }, 10);
 
@@ -141,7 +141,7 @@ export default function TextBox({
       setPhraseRunTime(totalTime);  // This should set the correct time
       getNewPhrase();
       phraseStartTime.current = null;
-      addNewPhraseData(wpm, accuracy, error, totalTime);
+      addNewPhraseData(wpm, error, totalTime);
       setIndexOfCurLetter(0);
     }
   }
