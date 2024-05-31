@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import TextBox from "./TextBox";
 import StatsBar from "./StatsBar";
 import DataTable from "./DataTable";
+import { validPhraseDataUpload } from "../config/firebase.js";
 
-export default function TypeGame({dictionary}) {
+export default function TypeGame({ dictionary, user }) {
   const [phrase, setPhrase] = useState([]);
   const [phraseRunTime, setPhraseRunTime] = useState(0);
   const [error, setError] = useState(0);
@@ -11,6 +12,8 @@ export default function TypeGame({dictionary}) {
   const [wordsPerMin, setWordsPerMin] = useState(0);
 
   const [phraseHistoryData, setPhraseHistoryData] = useState([]);
+  const localStoragePhraseData = useRef([]);
+  const PHRASE_BUFFER = 3;
 
   function Letter(char) {
     this.renderValue = char === " " ? "-" : char;
@@ -19,31 +22,44 @@ export default function TypeGame({dictionary}) {
   }
 
   function addNewPhraseData(wpm, err, totalTime) {
-    //  console.log(`inData: ${phraseRunTime}`);
-     setAccuracy(calculateAccuracy(err, phrase.length));
-    //  console.log(`errors: ${err} / phrase.length: ${phrase.length}`)
+    setAccuracy(calculateAccuracy(err, phrase.length));
     const curPhraseData = {
-      WPM: wpm,
+      WPM: wpm.toFixed(1),
       accuracy: accuracy,
       errors: err,
-      phraseRunTime: totalTime,
-      timeCompleted: new Date().toLocaleString()
+      phraseRunTime: (totalTime / 1000).toFixed(2),
+      timeCompleted: new Date().toLocaleString(),
     };
+    
+    localStoragePhraseData.current.push(curPhraseData);
+    console.log(localStoragePhraseData.current);
+
     const curPhraseHistoryData = [...phraseHistoryData];
     curPhraseHistoryData.push(curPhraseData);
+    //Storing to local
+    window.localStorage.setItem("storedLessons", JSON.stringify(localStoragePhraseData.current));
+    
+    if (curPhraseHistoryData.length > PHRASE_BUFFER) {
+      //shift off the oldest value
+      curPhraseHistoryData.shift();
+    }
+
+    phraseDataToDatabase(); 
     setPhraseHistoryData(curPhraseHistoryData);
   }
 
-  useEffect(() => {
-    console.log(`localStorage`)
-    phraseDataToLocalStorage();
-  }, [phraseHistoryData])
 
-  function phraseDataToLocalStorage(){
-    // if(phraseHistoryData.length > 9){
-      //pop of the 1 value and store it to the browser
-      // window.localStorage.setItem('storedLessons', JSON.stringify(phraseHistoryData));
-    // }
+  function phraseDataToDatabase(){
+    if(localStoragePhraseData.current.length > PHRASE_BUFFER){
+      //Send to database and clear
+      if(user !== null){
+        ///upload logic
+        validPhraseDataUpload(localStoragePhraseData.current, user);
+      }
+      // window.localStorage.removeItem("storedLessons");
+      localStoragePhraseData.current = [];
+      window.localStorage.removeItem('storedLessons');
+    }
   }
 
   //Stores letters of random words in to an array

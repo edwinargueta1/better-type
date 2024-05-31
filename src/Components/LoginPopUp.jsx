@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { loginUser } from "../config/firebase";
+import { auth } from "../config/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
 
@@ -7,11 +8,24 @@ export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
     email: "mail@mail.com",
     password: "cacaca",
   });
+  const [loginIndicator, setLoginIndicator] = useState('');
 
   async function login(event) {
     event.preventDefault();
-    // console.log(user)
     await loginUser(user.email, user.password);
+  }
+  function updateLoginIndicator(error){
+    setLoginIndicator(error.message);
+  }
+  async function loginUser(email, password) {
+    try {
+      const user = await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      if (error.message === "Firebase: Error (auth/user-not-found)."){
+        return setLoginIndicator('User Not Found.')
+      }
+        setLoginIndicator(error.message);
+    }
   }
 
   return popUpState ? (
@@ -38,6 +52,7 @@ export default function LoginPopUp({ popUpState, setPopUp, toggleState }) {
         <button type="submit" onClick={login}>
           Submit
         </button>
+        <p>{loginIndicator}</p>
       </form>
     </div>
   ) : (

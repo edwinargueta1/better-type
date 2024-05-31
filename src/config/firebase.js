@@ -11,6 +11,7 @@ import {
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
 import { doc, setDoc, collection } from "firebase/firestore";
+import { upload } from "@testing-library/user-event/dist/upload";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -51,16 +52,11 @@ export async function createNewUserInFirebase(data) {
     console.error(error);
   }
 }
-export async function loginUser(email, password) {
-  try {
-    console.log("login user ran");
-    const user = await signInWithEmailAndPassword(auth, email, password);
-    console.log(user);
-  } catch (error) {
-    console.log(error);
-  }
-}
+
 export function logout(auth) {
   signOut(auth);
   console.log("Signed out.")
+}
+export function validPhraseDataUpload(phraseData, user) {
+  // const data = doc(database, 'Users' )
 }

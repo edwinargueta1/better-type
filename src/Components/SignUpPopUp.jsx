@@ -59,16 +59,13 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
 
   async function signUpSuccess() {
     try {
-      console.log(newUser);
       const userCred = await createUserWithEmailAndPassword(
         auth,
         newUser.email,
         newUser.password
       );
       await updateProfile(userCred.user, {displayName: newUser.username});
-      console.log(userCred);
     } catch (error) {
-      console.error(error);
       setSignUpIndicator("Email already in use.");
       return;
     }

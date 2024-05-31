@@ -13,7 +13,6 @@ function App() {
   const [isSignUpActive, setIsSignUpActive] = useState(false);
   
   const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState('Guest');
   
 
   function toggleState(variable, functionVariable){
@@ -23,8 +22,8 @@ function App() {
   //User Management
   useEffect(()=>{
     const stateOfAuth = onAuthStateChanged(auth, (user) =>{
+      console.log(user)
       if(user){
-        console.log(user)
         setUser(user);
       }else{
         setUser(null);
@@ -77,7 +76,7 @@ function App() {
           toggleState={toggleState}
         />
       </div>
-      <TypeGame dictionary={dictionary} />
+      <TypeGame dictionary={dictionary} user={user}/>
     </div>
   );
 }

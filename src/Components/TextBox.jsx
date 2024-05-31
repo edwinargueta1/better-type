@@ -8,7 +8,6 @@ export default function TextBox({
   setPhraseRunTime,
   error,
   setError,
-  accuracy,
   setAccuracy,
   calculateAccuracy,
   setWordsPerMin,
@@ -84,9 +83,7 @@ export default function TextBox({
       event.key.length === 1 &&
       onlyLettersRegex.test(event.key);
 
-      console.log(`phraseTime: ${phraseStartTime.current}   isValid: ${isValidInput}`)
     if (phraseStartTime.current === null && isValidInput) {
-      console.log('error reset 1');
       //Resetting Variables
       setPhraseRunTime(0);
       setError(0);
@@ -121,7 +118,6 @@ export default function TextBox({
         } else {
           curPhrase[indexOfCurLetter].status = STATUS.ERROR;
           setError((prev) => prev + 1);
-          console.log(`an error gained ${error}`)
           return;
         }
       }

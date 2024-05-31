@@ -19,10 +19,10 @@ export default function DataTable({phraseHistoryData}){
               return (
                 <tr key={index}>
                   <td key={"date"}>{lesson.timeCompleted}</td>
-                  <td key={"WPM"}>{(lesson.WPM).toFixed(1)}</td>
+                  <td key={"WPM"}>{lesson.WPM}</td>
                   <td key={"acc"}>{lesson.accuracy}%</td>
                   <td key={"errors"}>{lesson.errors}</td>
-                  <td key={"timeCompleted"}>{((lesson.phraseRunTime)/1000).toFixed(2)}s</td>
+                  <td key={"timeCompleted"}>{lesson.phraseRunTime}s</td>
                 </tr>
               );
             })}
