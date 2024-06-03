@@ -151,12 +151,22 @@ export default function TextBox({
     setWordsPerMin(0);
     setCompletedWords(0);
   }
+  function resetPhraseProgress(){
+    const curPhrase = [...phrase];
+    curPhrase.forEach((element) => {
+      element.status = "untyped";
+    })
+    setPhrase(curPhrase);
+    setIndexOfCurLetter(0);
+  }
 
   function isFocused() {
     setFocused(true);
   }
   function isNotFocused() {
     setFocused(false);
+    resetParams();
+    resetPhraseProgress();
   }
 
   return (
