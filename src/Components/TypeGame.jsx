@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TextBox from "./TextBox";
 import StatsBar from "./StatsBar";
 import DataTable from "./DataTable";
-import { validPhraseDataUpload } from "../config/firebase.js";
+import { sendToDatabase, createFirebaseTimestamp } from "../config/firebase.js";
 
 export default function TypeGame({ dictionary, user }) {
   const [phrase, setPhrase] = useState([]);
@@ -12,8 +12,18 @@ export default function TypeGame({ dictionary, user }) {
   const [wordsPerMin, setWordsPerMin] = useState(0);
 
   const [phraseHistoryData, setPhraseHistoryData] = useState([]);
-  const localStoragePhraseData = useRef([]);
-  const PHRASE_BUFFER = 3;
+  let localStoragePhraseData = useRef([]);
+  const LESSON_BUFFER = 3;
+
+  //Local Storage Access
+  useEffect(() => {
+    if (window.localStorage.getItem("storedLessons")) {
+      localStoragePhraseData.current = JSON.parse(
+        window.localStorage.getItem("storedLessons")
+      );
+      setPhraseHistoryData(localStoragePhraseData.current);
+    }
+  }, []);
 
   function Letter(char) {
     this.renderValue = char === " " ? "-" : char;
@@ -23,43 +33,36 @@ export default function TypeGame({ dictionary, user }) {
 
   function addNewPhraseData(wpm, err, totalTime) {
     setAccuracy(calculateAccuracy(err, phrase.length));
+    // console.log(createFirebaseTimestamp())
     const curPhraseData = {
       WPM: wpm.toFixed(1),
       accuracy: accuracy,
       errors: err,
       phraseRunTime: (totalTime / 1000).toFixed(2),
-      timeCompleted: new Date().toLocaleString(),
+      timeCompleted: createFirebaseTimestamp()//createFirebaseTimestamp(), //new Date().getTime(),
     };
-    
+
+    sendToDatabase(user, curPhraseData);
+
     localStoragePhraseData.current.push(curPhraseData);
-    console.log(localStoragePhraseData.current);
 
     const curPhraseHistoryData = [...phraseHistoryData];
     curPhraseHistoryData.push(curPhraseData);
-    //Storing to local
-    window.localStorage.setItem("storedLessons", JSON.stringify(localStoragePhraseData.current));
-    
-    if (curPhraseHistoryData.length > PHRASE_BUFFER) {
+
+    while (curPhraseHistoryData.length > LESSON_BUFFER) {
       //shift off the oldest value
       curPhraseHistoryData.shift();
     }
-
-    phraseDataToDatabase(); 
-    setPhraseHistoryData(curPhraseHistoryData);
-  }
-
-
-  function phraseDataToDatabase(){
-    if(localStoragePhraseData.current.length > PHRASE_BUFFER){
-      //Send to database and clear
-      if(user !== null){
-        ///upload logic
-        validPhraseDataUpload(localStoragePhraseData.current, user);
-      }
-      // window.localStorage.removeItem("storedLessons");
-      localStoragePhraseData.current = [];
-      window.localStorage.removeItem('storedLessons');
+    while (localStoragePhraseData.current.length > LESSON_BUFFER) {
+      localStoragePhraseData.current.shift();
     }
+
+    //Storing to local
+    window.localStorage.setItem(
+      "storedLessons",
+      JSON.stringify(localStoragePhraseData.current)
+    );
+    setPhraseHistoryData(curPhraseHistoryData);
   }
 
   //Stores letters of random words in to an array
@@ -108,7 +111,7 @@ export default function TypeGame({ dictionary, user }) {
         setWordsPerMin={setWordsPerMin}
         addNewPhraseData={addNewPhraseData}
       />
-      <DataTable phraseHistoryData={phraseHistoryData}/>
+      <DataTable phraseHistoryData={phraseHistoryData} />
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import React from "react";
 
 export default function DataTable({phraseHistoryData}){
-
-
+  
 
     return (
       <div className="dataTableWrapper">
@@ -18,7 +17,7 @@ export default function DataTable({phraseHistoryData}){
             {phraseHistoryData.map((lesson, index) => {
               return (
                 <tr key={index}>
-                  <td key={"date"}>{lesson.timeCompleted}</td>
+                  <td key={"date"}>{new Date(lesson.timeCompleted).toLocaleString()}</td>
                   <td key={"WPM"}>{lesson.WPM}</td>
                   <td key={"acc"}>{lesson.accuracy}%</td>
                   <td key={"errors"}>{lesson.errors}</td>

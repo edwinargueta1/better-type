@@ -4,14 +4,12 @@ import { getAnalytics } from "firebase/analytics";
 import {
   getAuth,
   connectAuthEmulator,
-  signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
 } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, Timestamp } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
 import { doc, setDoc, collection } from "firebase/firestore";
-import { upload } from "@testing-library/user-event/dist/upload";
+import firebase from "firebase/compat/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -55,8 +53,21 @@ export async function createNewUserInFirebase(data) {
 
 export function logout(auth) {
   signOut(auth);
-  console.log("Signed out.")
+  console.log("Signed out.");
 }
-export function validPhraseDataUpload(phraseData, user) {
-  // const data = doc(database, 'Users' )
+export function createFirebaseTimestamp() {
+  return Timestamp.now().seconds;
+}
+
+export async function sendToDatabase(user, phraseData) {
+  if (user === null) return;
+  const docRef = doc(
+    database,
+    "Users",
+    user.displayName,
+    "lessonHistory",
+    phraseData.timeCompleted
+  ); 
+  await setDoc(docRef, phraseData);
+  console.log(`ran toDB`);
 }
