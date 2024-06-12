@@ -73,6 +73,7 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
     const userData = {
       userName: newUser.username,
       email: newUser.email,
+      profilePhoto: null,
       heightestWPM: 0,
       averageWPM: 0,
       lessons: 0,

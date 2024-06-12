@@ -27,8 +27,16 @@
 h1{
   color:var(--textColor);
 }
+li{
+  text-decoration: none;
+  list-style-type: none;
+}
 a{
   text-decoration: none;
+  color: var(--textColor);
+}
+a.active {
+  color: var(--primaryColor);
 }
 p{
   /* background-color: black; */
@@ -53,9 +61,7 @@ table{
   border-radius: 16px;
 }
 table .titleTableData{
-  
   border-bottom:rgb(34, 116, 34) solid 1px;
-  
 }
 
 .App{
@@ -77,23 +83,15 @@ table .titleTableData{
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 5px;
   /* border: solid red 1px; */
-}
-.navBarWrappper .navBar{
-  border: solid blue 1px;
 }
 .navBarWrapper .navBar ul{
   display: flex;
   text-decoration: none;
 }
 .navBarWrapper .navBar li{
-  text-decoration: none;
-  list-style-type: none;
   padding: 5px;
-}
-.navBarWrapper .navBar a{
-  color:var(--textColor);
-  text-decoration: none;
 }
 .textBoxWrapper{
   margin: auto;

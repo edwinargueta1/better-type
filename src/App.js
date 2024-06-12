@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { Link, Router, RouterProvider, Routes, createBrowserRouter, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import TypeGame from "./Components/TypeGame.jsx";
 import ProfileCard from "./Components/ProfileCard.jsx";
 import LoginPopUp from "./Components/LoginPopUp.jsx";
@@ -27,7 +27,8 @@ function App() {
   //User Management
   useEffect(()=>{
     const stateOfAuth = onAuthStateChanged(auth, (user) =>{
-      // console.log(user)
+      console.log(user)
+      console.log(new Date(user.metadata.creationTime).toLocaleDateString());
       if(user){
         setUser(user);
       }else{
@@ -86,7 +87,7 @@ function App() {
       <NavBar/>
       <Routes>
         <Route path="/" element={<TypeGame user={user} dictionary={dictionary}/>}/>
-        <Route path="/Profile" element={<ProfilePage/>}/>
+        <Route path="/Profile" element={<ProfilePage user={user}/>}/>
         <Route path="/Leaderboard" element={<LeaderboardPage/>}/>
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>

@@ -1,24 +1,20 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getAuth, connectAuthEmulator, signOut } from "firebase/auth";
 import {
-  getAuth,
-  connectAuthEmulator,
-  signOut,
-} from "firebase/auth";
-import { 
-  getFirestore, 
-  connectFirestoreEmulator, 
-  Timestamp, 
-  addDoc, 
-  getAggregateFromServer, 
-  collection, 
-  setDoc, 
-  average, 
-  getCountFromServer, 
-  doc, 
+  getFirestore,
+  connectFirestoreEmulator,
+  Timestamp,
+  addDoc,
+  getAggregateFromServer,
+  collection,
+  setDoc,
+  average,
+  getCountFromServer,
+  doc,
   sum,
-  count
+  count,
 } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -70,13 +66,13 @@ export function createFirebaseTimestamp() {
   return Timestamp.now().seconds * 1000;
 }
 
-export async function sendToDatabase(user, phraseData) {
+export async function sendToPhraseDatabase(user, phraseData) {
   if (user === null) return;
   const colRef = collection(
     database,
     "Users",
     user.displayName,
-    "lessonHistory",
+    "lessonHistory"
   );
   try {
     await addDoc(colRef, phraseData);
@@ -86,28 +82,37 @@ export async function sendToDatabase(user, phraseData) {
 }
 
 export async function getUserStats(user) {
-  if(user === null ) return;
-  console.log(user.displayName);
+  if (user === null) return;
+  // console.log(user.displayName);
   try {
     const col = collection(database, `Users/${user.displayName}/lessonHistory`);
-    console.log(col)
+    // console.log(col);
 
     const snapCount = await getCountFromServer(col);
-    console.log(snapCount.data().count)
+    // console.log(snapCount.data().count);
 
     // const average = await getAggregateFromServer(query())
 
-
     const snap = await getAggregateFromServer(col, {
-      averageWPM: average('WPM'),
-      averageAccuracy: average('accuracy'),
-      totalErrors: sum('errors'),
+      averageWPM: average("WPM"),
+      averageAccuracy: average("accuracy"),
+      totalErrors: sum("errors"),
       lessons: count(),
-      totalTime: sum('phraseRunTime')
+      totalTime: sum("phraseRunTime"),
     });
+    const data = {
+      averageWPM: snap.data().averageWPM,
+      averageAccuracy: snap.data().averageAccuracy,
+      totalErrors: snap.data().totalErrors,
+      lessons: snap.data().lessons,
+      totalTime: snap.data().totalTime
 
-    console.log(snap.data())
+    }
+
+    console.log(data);
+    return data;
   } catch (error) {
     console.error(error);
   }
 }
+

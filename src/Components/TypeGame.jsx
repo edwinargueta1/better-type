@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
 import TextBox from "./TextBox";
 import StatsBar from "./StatsBar";
 import DataTable from "./DataTable";
-import { sendToDatabase, createFirebaseTimestamp, getUserStats } from "../config/firebase.js";
+import {
+  sendToPhraseDatabase,
+  createFirebaseTimestamp,
+  getUserStats,
+} from "../config/firebase.js";
 
 export default function TypeGame({ user, dictionary }) {
   const [phrase, setPhrase] = useState([]);
@@ -18,10 +21,9 @@ export default function TypeGame({ user, dictionary }) {
   const LESSON_BUFFER = 6;
 
   //Debuggingg----------
-  useEffect(()=> {
+  useEffect(() => {
     console.log(phraseHistoryData);
   }, [phraseHistoryData]);
-
 
   //Local Storage Access
   useEffect(() => {
@@ -40,13 +42,13 @@ export default function TypeGame({ user, dictionary }) {
     this.status = "untyped";
   }
 
-  function setPhraseLength(len = 10){
+  function setPhraseLength(len = 10) {
     phraseWordCount.current = len;
     getNewPhrase();
   }
 
   function addNewPhraseData(wpm, err, totalTime) {
-    console.log(`ran AddNewPhraseData`,phraseHistoryData);
+    console.log(`ran AddNewPhraseData`, phraseHistoryData);
     setAccuracy(calculateAccuracy(err, phrase.length));
     // console.log(createFirebaseTimestamp())
     // console.log(typeof wpm, wpm , wpm.toFixed(1))
@@ -55,18 +57,16 @@ export default function TypeGame({ user, dictionary }) {
       accuracy: accuracy,
       errors: err,
       phraseRunTime: Number((totalTime / 1000).toFixed(2)),
-      timeCompleted: createFirebaseTimestamp()//createFirebaseTimestamp(), //new Date().getTime(),
+      timeCompleted: createFirebaseTimestamp(), //createFirebaseTimestamp(), //new Date().getTime(),
     };
 
-    sendToDatabase(user, curPhraseData);
+    sendToPhraseDatabase(user, curPhraseData);
 
     const curPhraseHistoryData = [...phraseHistoryData];
     curPhraseHistoryData.push(curPhraseData);
 
     localStoragePhraseData.current.push(curPhraseData);
-    console.log(`Check`,localStoragePhraseData.current, phraseHistoryData)///////------------------
-
-    
+    console.log(`Check`, localStoragePhraseData.current, phraseHistoryData); ///////------------------
 
     while (curPhraseHistoryData.length > LESSON_BUFFER) {
       //shift off the oldest value
@@ -82,7 +82,7 @@ export default function TypeGame({ user, dictionary }) {
       JSON.stringify(localStoragePhraseData.current)
     );
     setPhraseHistoryData(curPhraseHistoryData);
-    getUserStats(user, 'WPM')// Add Page for this
+    getUserStats(user, "WPM"); // Add Page for this
   }
 
   //Stores letters of random words in to an array
