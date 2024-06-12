@@ -1,11 +1,17 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
+import { Link, Router, RouterProvider, Routes, createBrowserRouter, Route } from "react-router-dom";
 import TypeGame from "./Components/TypeGame.jsx";
-import Profile from "./Components/Profile.jsx";
+import ProfileCard from "./Components/ProfileCard.jsx";
 import LoginPopUp from "./Components/LoginPopUp.jsx";
 import SignUpPopUp from "./Components/SignUpPopUp.jsx";
+import NavBar from "./Components/NavBar.jsx";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./config/firebase.js";
+import ErrorPage from "./Components/ErrorPage.jsx";
+import LeaderboardPage from "./Components/LeaderboardPage.jsx";
+import ProfilePage from "./Components/ProfilePage.jsx";
+
 
 function App() {
   const [dictionary, setDictionary] = useState([]);
@@ -13,7 +19,6 @@ function App() {
   const [isSignUpActive, setIsSignUpActive] = useState(false);
   
   const [user, setUser] = useState(null);
-  
 
   function toggleState(variable, functionVariable){
     functionVariable(!variable)
@@ -22,7 +27,7 @@ function App() {
   //User Management
   useEffect(()=>{
     const stateOfAuth = onAuthStateChanged(auth, (user) =>{
-      console.log(user)
+      // console.log(user)
       if(user){
         setUser(user);
       }else{
@@ -53,7 +58,9 @@ function App() {
 
 
   return (
+    
     <div className="App">
+      
       <LoginPopUp
         popUpState={isLoginActive}
         setPopUp={setIsLoginActive}
@@ -67,7 +74,7 @@ function App() {
       <div className="title">
         <div className="spacer"></div>
         <h1 className="titleName">Better Type</h1>
-        <Profile
+        <ProfileCard
           user={user}
           isLoginActive={isLoginActive}
           setIsLoginActive={setIsLoginActive}
@@ -76,7 +83,13 @@ function App() {
           toggleState={toggleState}
         />
       </div>
-      <TypeGame dictionary={dictionary} user={user}/>
+      <NavBar/>
+      <Routes>
+        <Route path="/" element={<TypeGame user={user} dictionary={dictionary}/>}/>
+        <Route path="/Profile" element={<ProfilePage/>}/>
+        <Route path="/Leaderboard" element={<LeaderboardPage/>}/>
+        <Route path="*" element={<ErrorPage/>}/>
+      </Routes>
     </div>
   );
 }

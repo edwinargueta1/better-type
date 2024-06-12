@@ -6,10 +6,21 @@ import {
   connectAuthEmulator,
   signOut,
 } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator, Timestamp } from "firebase/firestore";
+import { 
+  getFirestore, 
+  connectFirestoreEmulator, 
+  Timestamp, 
+  addDoc, 
+  getAggregateFromServer, 
+  collection, 
+  setDoc, 
+  average, 
+  getCountFromServer, 
+  doc, 
+  sum,
+  count
+} from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
-import { doc, setDoc, collection } from "firebase/firestore";
-import firebase from "firebase/compat/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -40,7 +51,7 @@ if (
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(database, "127.0.0.1", 8080);
 }
-//Dev Mode End
+//...Dev Mode End
 
 export async function createNewUserInFirebase(data) {
   try {
@@ -56,18 +67,47 @@ export function logout(auth) {
   console.log("Signed out.");
 }
 export function createFirebaseTimestamp() {
-  return Timestamp.now().seconds;
+  return Timestamp.now().seconds * 1000;
 }
 
 export async function sendToDatabase(user, phraseData) {
   if (user === null) return;
-  const docRef = doc(
+  const colRef = collection(
     database,
     "Users",
     user.displayName,
     "lessonHistory",
-    phraseData.timeCompleted
-  ); 
-  await setDoc(docRef, phraseData);
-  console.log(`ran toDB`);
+  );
+  try {
+    await addDoc(colRef, phraseData);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function getUserStats(user) {
+  if(user === null ) return;
+  console.log(user.displayName);
+  try {
+    const col = collection(database, `Users/${user.displayName}/lessonHistory`);
+    console.log(col)
+
+    const snapCount = await getCountFromServer(col);
+    console.log(snapCount.data().count)
+
+    // const average = await getAggregateFromServer(query())
+
+
+    const snap = await getAggregateFromServer(col, {
+      averageWPM: average('WPM'),
+      averageAccuracy: average('accuracy'),
+      totalErrors: sum('errors'),
+      lessons: count(),
+      totalTime: sum('phraseRunTime')
+    });
+
+    console.log(snap.data())
+  } catch (error) {
+    console.error(error);
+  }
 }

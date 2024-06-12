@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { auth, logout } from "../config/firebase.js"
 
-export default function Profile({
+export default function ProfileCard({
   user,
   isLoginActive,
   setIsLoginActive,

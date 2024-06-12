@@ -2,7 +2,7 @@ export default function StatsBar({  error, accuracy, phraseRunTime, wordsPerMin 
   return (
     <div id="statBarAreaWrapper">
       <div id="statBar">
-        <p>Lesson Stats:</p>
+        <p>Stats:</p>
         <p>WPM: {wordsPerMin.toFixed(1)}</p>
         <p>Accuracy: {accuracy}%</p>
         <p>Errors: {error}</p>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import UtilBar from "./UtilBar";
 
 export default function TextBox({
   dictionary,
   phrase,
   setPhrase,
+  setPhraseLength,
   getNewPhrase,
   setPhraseRunTime,
   error,
@@ -11,7 +13,8 @@ export default function TextBox({
   setAccuracy,
   calculateAccuracy,
   setWordsPerMin,
-  addNewPhraseData
+  addNewPhraseData,
+  phraseWordCount
 }) {
   //Component level Variables
   const [focused, setFocused] = useState(false);
@@ -170,16 +173,14 @@ export default function TextBox({
   }
 
   return (
-    <div className="typingIndicatorOverlay">
-      {focused ? "" : <p className="indicator">Click here to start typing!</p>}
+    <div className="textBoxWrapper" onFocus={isFocused}
+    onBlur={isNotFocused} tabIndex={0}>
+      <div className="typingIndicatorOverlay" >
+      <p className={`indicator ${focused ? "hidden" : ""}`}>Click here to start typing!</p>
       <div
-        id="textBoxWrapper"
-        style={{ filter: focused ? "none" : "blur(8px)" }}
-        tabIndex={0}
-        onFocus={isFocused}
-        onBlur={isNotFocused}
+        className={`textBox ${focused ? "" : "notFocused"}`}
       >
-        <p>
+        <p className={focused ? "" : "notFocused"}>
           {phrase.map((element, index) => {
             return (
               <React.Fragment key={index}>
@@ -207,13 +208,10 @@ export default function TextBox({
             );
           })}
         </p>
-        <button className="clearButton" onClick={() => {
-          getNewPhrase();
-          resetParams();
-        }}>
-          New Phrase
-        </button>
       </div>
     </div>
+        <UtilBar getNewPhrase={getNewPhrase} resetParams={resetParams} setPhraseLength={setPhraseLength} phraseWordCount={phraseWordCount}/>
+    </div>
+    
   );
 }

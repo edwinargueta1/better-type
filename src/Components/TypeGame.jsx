@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import TextBox from "./TextBox";
 import StatsBar from "./StatsBar";
 import DataTable from "./DataTable";
-import { sendToDatabase, createFirebaseTimestamp } from "../config/firebase.js";
+import { sendToDatabase, createFirebaseTimestamp, getUserStats } from "../config/firebase.js";
 
-export default function TypeGame({ dictionary, user }) {
+export default function TypeGame({ user, dictionary }) {
   const [phrase, setPhrase] = useState([]);
   const [phraseRunTime, setPhraseRunTime] = useState(0);
   const [error, setError] = useState(0);
@@ -13,10 +14,18 @@ export default function TypeGame({ dictionary, user }) {
 
   const [phraseHistoryData, setPhraseHistoryData] = useState([]);
   let localStoragePhraseData = useRef([]);
-  const LESSON_BUFFER = 3;
+  let phraseWordCount = useRef(10);
+  const LESSON_BUFFER = 6;
+
+  //Debuggingg----------
+  useEffect(()=> {
+    console.log(phraseHistoryData);
+  }, [phraseHistoryData]);
+
 
   //Local Storage Access
   useEffect(() => {
+    console.log(localStoragePhraseData.current, phraseHistoryData);
     if (window.localStorage.getItem("storedLessons")) {
       localStoragePhraseData.current = JSON.parse(
         window.localStorage.getItem("storedLessons")
@@ -31,23 +40,33 @@ export default function TypeGame({ dictionary, user }) {
     this.status = "untyped";
   }
 
+  function setPhraseLength(len = 10){
+    phraseWordCount.current = len;
+    getNewPhrase();
+  }
+
   function addNewPhraseData(wpm, err, totalTime) {
+    console.log(`ran AddNewPhraseData`,phraseHistoryData);
     setAccuracy(calculateAccuracy(err, phrase.length));
     // console.log(createFirebaseTimestamp())
+    // console.log(typeof wpm, wpm , wpm.toFixed(1))
     const curPhraseData = {
-      WPM: wpm.toFixed(1),
+      WPM: Number(wpm.toFixed(1)),
       accuracy: accuracy,
       errors: err,
-      phraseRunTime: (totalTime / 1000).toFixed(2),
+      phraseRunTime: Number((totalTime / 1000).toFixed(2)),
       timeCompleted: createFirebaseTimestamp()//createFirebaseTimestamp(), //new Date().getTime(),
     };
 
     sendToDatabase(user, curPhraseData);
 
-    localStoragePhraseData.current.push(curPhraseData);
-
     const curPhraseHistoryData = [...phraseHistoryData];
     curPhraseHistoryData.push(curPhraseData);
+
+    localStoragePhraseData.current.push(curPhraseData);
+    console.log(`Check`,localStoragePhraseData.current, phraseHistoryData)///////------------------
+
+    
 
     while (curPhraseHistoryData.length > LESSON_BUFFER) {
       //shift off the oldest value
@@ -63,12 +82,13 @@ export default function TypeGame({ dictionary, user }) {
       JSON.stringify(localStoragePhraseData.current)
     );
     setPhraseHistoryData(curPhraseHistoryData);
+    getUserStats(user, 'WPM')// Add Page for this
   }
 
   //Stores letters of random words in to an array
   function getNewPhrase() {
     let newRandomWords = [];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < phraseWordCount.current; i++) {
       let randomDictionaryWord =
         dictionary[Math.floor(Math.random() * dictionary.length)];
       for (let j = 0; j < randomDictionaryWord.length; j++) {
@@ -85,12 +105,12 @@ export default function TypeGame({ dictionary, user }) {
       ? 0
       : (((totalChars - error) / totalChars) * 100).toFixed(2);
     let formated =
-      newAccuracy % 1 === 0 ? Math.floor(newAccuracy) : newAccuracy;
+      newAccuracy % 1 === 0 ? Math.floor(newAccuracy) : Number(newAccuracy);
     return formated;
   }
 
   return (
-    <div id="gameWrapper">
+    <div className="gameWrapper">
       <StatsBar
         error={error}
         accuracy={accuracy}
@@ -101,6 +121,7 @@ export default function TypeGame({ dictionary, user }) {
         dictionary={dictionary}
         phrase={phrase}
         setPhrase={setPhrase}
+        setPhraseLength={setPhraseLength}
         getNewPhrase={getNewPhrase}
         setPhraseRunTime={setPhraseRunTime}
         error={error}
@@ -110,6 +131,7 @@ export default function TypeGame({ dictionary, user }) {
         wordsPerMin={wordsPerMin}
         setWordsPerMin={setWordsPerMin}
         addNewPhraseData={addNewPhraseData}
+        phraseWordCount={phraseWordCount}
       />
       <DataTable phraseHistoryData={phraseHistoryData} />
     </div>
