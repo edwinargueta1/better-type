@@ -7,14 +7,14 @@ export default function DataTable({ phraseHistoryData }) {
       <table>
         <thead>
           <tr>
-            <td colSpan={5} className="tableTile">Recent Lessons</td>
+            <th colSpan={5} className="tableTile">Recent Lessons</th>
           </tr>
           <tr className="titleTableData" key={-1}>
-            <td>Completed</td>
-            <td>WPM</td>
-            <td>Accuracy</td>
-            <td>Errors</td>
-            <td>Run Time</td>
+            <th>Completed</th>
+            <th>WPM</th>
+            <th>Accuracy</th>
+            <th>Errors</th>
+            <th>Run Time</th>
           </tr>
 
         </thead>

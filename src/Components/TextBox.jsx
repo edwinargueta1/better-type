@@ -22,7 +22,7 @@ export default function TextBox({
   const [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
   const [completedWords, setCompletedWords] = useState(1);
   const onlyLettersRegex = new RegExp("[A-Za-z\\s]");
-  const englishAverageWord = 5;
+  const averageEnglishWord = 5;
 
   const STATUS = {
     UNTYPED: "untyped",
@@ -62,7 +62,7 @@ export default function TextBox({
         return curTime - phraseStartTime.current;
       });
       setWordsPerMin(() => {
-        return ((indexOfCurLetter/englishAverageWord) / elapsedTimeInSec) * 60;
+        return ((indexOfCurLetter/averageEnglishWord) / elapsedTimeInSec) * 60;
       });
     }, 10);
 
@@ -134,7 +134,7 @@ export default function TextBox({
     ) {
       const endTime = performance.now();
       const totalTime = (endTime - phraseStartTime.current);  // Calculate in seconds
-      const wpm = ((completedWords + 1) / (totalTime / 1000)) * 60;
+      const wpm = ((indexOfCurLetter/ averageEnglishWord) / (totalTime / 1000)) * 60;
 
       setWordsPerMin(wpm)
       setPhraseRunTime(totalTime);  // This should set the correct time

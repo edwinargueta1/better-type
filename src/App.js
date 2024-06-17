@@ -27,9 +27,10 @@ function App() {
   //User Management
   useEffect(()=>{
     const stateOfAuth = onAuthStateChanged(auth, (user) =>{
-      console.log(user)
-      console.log(new Date(user.metadata.creationTime).toLocaleDateString());
+      
       if(user){
+        console.log(user);
+        console.log(new Date(user.metadata.creationTime).toLocaleDateString());
         setUser(user);
       }else{
         setUser(null);
@@ -59,9 +60,9 @@ function App() {
 
 
   return (
-    
+
     <div className="App">
-      
+
       <LoginPopUp
         popUpState={isLoginActive}
         setPopUp={setIsLoginActive}
@@ -84,14 +85,20 @@ function App() {
           toggleState={toggleState}
         />
       </div>
-      <NavBar/>
-      <Routes>
-        <Route path="/" element={<TypeGame user={user} dictionary={dictionary}/>}/>
-        <Route path="/Profile" element={<ProfilePage user={user}/>}/>
-        <Route path="/Leaderboard" element={<LeaderboardPage/>}/>
-        <Route path="*" element={<ErrorPage/>}/>
-      </Routes>
+      <NavBar />
+      <div className="bodyContent">
+        <Routes>
+          <Route path="/" element={<TypeGame user={user} dictionary={dictionary} />} />
+          <Route path="/Profile" element={<ProfilePage user={user} />} />
+          <Route path="/Leaderboard" element={<LeaderboardPage />} />
+          <Route path="*" element={<ErrorPage />} />
+        </Routes>
+      </div>
+      <div className="footer">
+        
+      </div>
     </div>
+  
   );
 }
 

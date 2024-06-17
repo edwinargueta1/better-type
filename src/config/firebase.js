@@ -13,8 +13,15 @@ import {
   average,
   getCountFromServer,
   doc,
+  firestoreQuery,
   sum,
   count,
+  limit,
+  updateDoc,
+  orderBy,
+  getDoc,
+  getDocs,
+  query,
 } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth/cordova";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -100,9 +107,9 @@ export async function getUserStats(user) {
       lessons: count(),
       totalTime: sum("phraseRunTime"),
     });
-    const data = {
-      averageWPM: snap.data().averageWPM,
-      averageAccuracy: snap.data().averageAccuracy,
+    const data = {//Edit-------------
+      averageWPM: ( typeof snap.data().averageWPM === 'number') ?  snap.data().averageWPM : 0,
+      averageAccuracy: ( typeof snap.data().averageAccuracy === 'number') ? snap.data().averageAccuracy : 0,
       totalErrors: snap.data().totalErrors,
       lessons: snap.data().lessons,
       totalTime: snap.data().totalTime
@@ -116,3 +123,21 @@ export async function getUserStats(user) {
   }
 }
 
+export async function updateProfile(user, stats) {
+  const docRef = doc(database, `Users/${user.displayName}`)
+  updateDoc(docRef, stats);
+}
+export async function loadLeaderboard() {
+  let userCollection = collection(database, "Users");
+  let doesCollectionExists = (await getDocs(userCollection)).empty;
+
+  if (doesCollectionExists) return;
+  const q =  query(userCollection, orderBy('averageWPM', 'desc'), limit(3));
+  let docs = await getDocs(q);
+  const leaderboard = [];
+  docs.forEach((doc) => {
+    leaderboard.push({ id: doc.id, ...doc.data() });
+  });
+  console.log(leaderboard)
+  return leaderboard;
+}

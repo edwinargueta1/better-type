@@ -6,7 +6,7 @@ export default function NavBar(){
     const location = useLocation();
 
     function logger(){
-        console.log(location)
+        // console.log(location)
     }
     return (
       <div className="navBarWrapper" onClick={logger}>

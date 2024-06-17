@@ -18,16 +18,16 @@ export default function TypeGame({ user, dictionary }) {
   const [phraseHistoryData, setPhraseHistoryData] = useState([]);
   let localStoragePhraseData = useRef([]);
   let phraseWordCount = useRef(10);
-  const LESSON_BUFFER = 6;
+  const LESSON_BUFFER = 5;
 
   //Debuggingg----------
   useEffect(() => {
-    console.log(phraseHistoryData);
+    // console.log(phraseHistoryData);
   }, [phraseHistoryData]);
 
   //Local Storage Access
   useEffect(() => {
-    console.log(localStoragePhraseData.current, phraseHistoryData);
+    // console.log(localStoragePhraseData.current, phraseHistoryData);
     if (window.localStorage.getItem("storedLessons")) {
       localStoragePhraseData.current = JSON.parse(
         window.localStorage.getItem("storedLessons")
@@ -48,7 +48,7 @@ export default function TypeGame({ user, dictionary }) {
   }
 
   function addNewPhraseData(wpm, err, totalTime) {
-    console.log(`ran AddNewPhraseData`, phraseHistoryData);
+    // console.log(`ran AddNewPhraseData`, phraseHistoryData);
     setAccuracy(calculateAccuracy(err, phrase.length));
     // console.log(createFirebaseTimestamp())
     // console.log(typeof wpm, wpm , wpm.toFixed(1))

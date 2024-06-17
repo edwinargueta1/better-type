@@ -74,10 +74,10 @@ export default function SignUpPopUp({ popUpState, setPopUp, toggleState }) {
       userName: newUser.username,
       email: newUser.email,
       profilePhoto: null,
-      heightestWPM: 0,
+      highestWPM: 0,
       averageWPM: 0,
+      averageAccuracy: 0,
       lessons: 0,
-      totalWords: 0,
       totalErrors: 0,
       totalTime: 0,
     };
