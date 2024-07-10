@@ -1,7 +1,13 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth, connectAuthEmulator, signOut } from "firebase/auth";
+import { 
+  getAuth, connectAuthEmulator, signOut, 
+  GoogleAuthProvider, signInWithPopup, 
+  createUserWithEmailAndPassword, updateProfile,
+  signInWithEmailAndPassword, 
+  deleteUser
+} from "firebase/auth";
+
 import {
   getFirestore,
   connectFirestoreEmulator,
@@ -11,9 +17,7 @@ import {
   collection,
   setDoc,
   average,
-  getCountFromServer,
   doc,
-  firestoreQuery,
   sum,
   count,
   limit,
@@ -22,13 +26,9 @@ import {
   getDoc,
   getDocs,
   query,
+  where
 } from "firebase/firestore";
-import { GoogleAuthProvider } from "firebase/auth/cordova";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -56,19 +56,179 @@ if (
 }
 //...Dev Mode End
 
-export async function createNewUserInFirebase(data) {
+export async function createNewUserInFirestore(user) {
+  const userData = {
+    displayName: user.displayName,
+    email: user.email,
+    highestWPM10: 0,
+    highestWPM20: 0,
+    highestWPM30: 0,
+    averageWPM: 0,
+    averageAccuracy: 0,
+    lessons: 0,
+    totalErrors: 0,
+    totalTimeInSec: 0,
+  };
   try {
-    const docRef = await setDoc(doc(database, "Users", data.userName), data);
-    // console.log("Document Created with: ", docRef.id);
+    await setDoc(doc(database, "Users", user.email), userData);
+  } catch (error) {
+    console.error(error);
+  }
+}
+export async function signUpWithEmail(event, user, setIndicator){
+  event.preventDefault();
+  try{
+    let isValid = await validSignUp(user, setIndicator);
+    if(isValid){
+      signUpSuccess(user, setIndicator);
+    }
+  }catch(error){
+    console.error(error)
+  }
+}
+
+export async function loginUserWithEmail(event, email, password, setIndicator) {
+  event.preventDefault();
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    if (error.message === "Firebase: Error (auth/user-not-found)."){
+      return setIndicator('User Not Found.')
+    }
+      return setIndicator(error.message);
+  }
+}
+
+async function validSignUp(user, setIndicator) {
+
+  const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  //Valid password
+  if (user.password.length < 6) {
+    setIndicator("Password must be 6 characters or longer.");
+    return false;
+  }
+  //If both passwords don't match
+  if (user.password !== user.reEnterPassword) {
+    setIndicator("Passwords do not match.");
+    return false;
+  }
+  //Username correct format
+  if(!validFormatUserName(user.displayName, setIndicator)){
+    return false;
+  }
+  //correct email format
+  if (!validEmailRegex.test(user.email)) {
+    setIndicator("Not a valid email format.");
+    return false;
+  }
+
+  //Email exists
+  const docRef = doc(database, "Users", user.email);
+  const doesDocumentExist = await getDoc(docRef);
+  if (doesDocumentExist.exists()) {
+    setIndicator("Email is already in use.");
+    return false;
+  }
+
+  if(await userNameIsTaken(user.displayName)){
+    console.log("Username taken? ", userNameIsTaken(user.displayName))
+    setIndicator("Username is taken. Try another.");
+    return false;
+  }
+  console.log(`passed validsign up`)
+  return true;
+}
+
+function validFormatUserName(userName, setIndicator) {
+  const validUsernameRegex = /^[A-Za-z0-9]+$/;
+
+  //Username length needs to be between 1 and 16 characters
+  if (userName.length < 1 && userName.length > 16) {
+    setIndicator("Username must be between 1 - 16 characters.");
+    return false;
+  }
+  //Username can't contain special characters
+  if (!validUsernameRegex.test(userName)) {
+    setIndicator("Username must only have letter and numbers.");
+    return false;
+  }
+  return true;
+}
+async function userNameIsTaken(userName){
+  const usersCol = collection(database, "Users");
+  const userNameQuery = query(usersCol, where("userName", "==", userName), limit(1));
+  const userNameSnapshot = await getDocs(userNameQuery);
+  console.log(userNameSnapshot, userNameSnapshot.empty);
+  return !userNameSnapshot.empty;
+}
+
+async function signUpSuccess(user, setIndicator) {
+  try {
+    const userCred = await createUserWithEmailAndPassword(
+      auth,
+      user.email,
+      user.password
+    );
+    await updateProfile(userCred.user, {displayName: user.displayName});
+  } catch (error) {
+    setIndicator("Email already in use.");
+    return;
+  }
+
+  createNewUserInFirestore(user);
+  setIndicator(`Successfully created: ${user.displayName}`);
+}
+
+export async function signUpWithGoogle(event, userName, setIndicator) {
+  event.preventDefault();
+  if(userName.length < 1 ){
+    setIndicator("Need to add a username.");
+    return;
+  }
+  if (!validFormatUserName(userName, setIndicator)) {
+    return;
+  }
+  if (await userNameIsTaken(userName)) {
+    setIndicator("Username is taken. Try another.");
+    return;
+  }
+  try {
+    signInWithPopup(auth, googleProvider).then(async(res) => {
+      await updateProfile(res.user, {displayName: userName});
+      createNewUserInFirestore(res.user);
+      return res;
+    })
   } catch (error) {
     console.error(error);
   }
 }
 
+export async function loginWithGoogle(event, setIndicator, setPopUp) {
+  event.preventDefault();
+  try {
+    const res = await signInWithPopup(auth, googleProvider);
+    
+    // Check if the email exists as a doc in Firestore
+    const userRef = doc(database, `Users/${res.user.email}`);
+    const snapShot = await getDoc(userRef);
+
+    if (!snapShot.exists()) {
+      await deleteUser(res.user);
+      throw new Error("Email does not exist.");
+    }
+    setPopUp(false);
+  } catch (error) {
+    setIndicator("Account does not exist. Sign Up.");
+    console.error(error);
+  } 
+}
+
+
 export function logout(auth) {
   signOut(auth);
-  console.log("Signed out.");
 }
+
 export function createFirebaseTimestamp() {
   return Timestamp.now().seconds * 1000;
 }
@@ -78,8 +238,8 @@ export async function sendToPhraseDatabase(user, phraseData) {
   const colRef = collection(
     database,
     "Users",
-    user.displayName,
-    "lessonHistory"
+    user.email,
+    `lessonHistory${phraseData.completedWords}`
   );
   try {
     await addDoc(colRef, phraseData);
@@ -90,54 +250,126 @@ export async function sendToPhraseDatabase(user, phraseData) {
 
 export async function getUserStats(user) {
   if (user === null) return;
-  // console.log(user.displayName);
   try {
-    const col = collection(database, `Users/${user.displayName}/lessonHistory`);
-    // console.log(col);
+    const collections = {
+      col10 : collection(database, `Users/${user.email}/lessonHistory10`),
+      col20 : collection(database, `Users/${user.email}/lessonHistory20`),
+      col30 : collection(database, `Users/${user.email}/lessonHistory30`)
+    };
+    const highestWPM = [
+      (getDocs(getHighestWPM(collections.col10))),
+      (getDocs(getHighestWPM(collections.col20))),
+      (getDocs(getHighestWPM(collections.col30)))
+    ]
 
-    const snapCount = await getCountFromServer(col);
-    // console.log(snapCount.data().count);
+    //In object form
+    const promises = Object.values(collections).map(col => 
+      getAggregateFromServer(col, {
+        averageWPM: average("WPM"),
+        averageAccuracy: average("accuracy"),
+        totalErrors: sum("errors"),
+        lessons: count(),
+        totalTimeInSec: sum("phraseRunTime")
+      })
+    );
 
-    // const average = await getAggregateFromServer(query())
+    let resultCollections = await Promise.all(promises);
+    let resultHighestWPM = await Promise.all(highestWPM);
 
-    const snap = await getAggregateFromServer(col, {
-      averageWPM: average("WPM"),
-      averageAccuracy: average("accuracy"),
-      totalErrors: sum("errors"),
-      lessons: count(),
-      totalTime: sum("phraseRunTime"),
-    });
-    const data = {//Edit-------------
-      averageWPM: ( typeof snap.data().averageWPM === 'number') ?  snap.data().averageWPM : 0,
-      averageAccuracy: ( typeof snap.data().averageAccuracy === 'number') ? snap.data().averageAccuracy : 0,
-      totalErrors: snap.data().totalErrors,
-      lessons: snap.data().lessons,
-      totalTime: snap.data().totalTime
+    if (!resultCollections) { throw "Could not get all Collection Data." };
+    if (!resultHighestWPM) { throw "Could not get all HWPM Data." };
 
-    }
-
-    console.log(data);
-    return data;
+    return calculateOverallStats(resultCollections, resultHighestWPM);
   } catch (error) {
     console.error(error);
   }
 }
 
-export async function updateProfile(user, stats) {
-  const docRef = doc(database, `Users/${user.displayName}`)
+function getHighestWPM(collection){
+  return query(collection, orderBy('WPM', 'desc'), limit(1));
+}
+
+function calculateOverallStats(collectionData, highestWPMData){
+  let updatedCollections = collectionData.map((element) => {
+    const data = element.data();
+    return {
+      averageWPM: typeof data.averageWPM === 'number' ? data.averageWPM : 0,
+      averageAccuracy: typeof data.averageAccuracy === 'number' ? data.averageAccuracy : 0,
+      totalErrors: data.totalErrors,
+      lessons: data.lessons,
+      totalTimeInSec: data.totalTimeInSec
+    };
+  });
+  updatedCollections = handleEmptyCollections(updatedCollections);
+
+  const combinedUserStats = {
+    highestWPM10 : highestWPMData[0].docs[0]?.data().WPM ?? 0,        
+    highestWPM20 : highestWPMData[1].docs[0]?.data().WPM ?? 0,
+    highestWPM30 : highestWPMData[2].docs[0]?.data().WPM ?? 0,
+    averageAccuracy: 0,
+    averageWPM: 0,
+    totalErrors: 0,
+    lessons: 0,
+    totalTimeInSec: 0
+  }
+  updatedCollections.forEach((element) => {
+    combinedUserStats.averageAccuracy += element.averageAccuracy;
+    combinedUserStats.averageWPM += element.averageWPM;
+    combinedUserStats.totalErrors += element.totalErrors;
+    combinedUserStats.lessons += element.lessons;
+    combinedUserStats.totalTimeInSec += element.totalTimeInSec;
+  });
+  //Getting Averages
+  combinedUserStats.averageAccuracy /= updatedCollections.length;
+  combinedUserStats.averageWPM /= updatedCollections.length;
+
+  //Handles no lessons
+  if(Number.isNaN(combinedUserStats.averageAccuracy)){combinedUserStats.averageAccuracy = 0};
+  if(Number.isNaN(combinedUserStats.averageWPM)){combinedUserStats.averageWPM = 0};
+
+
+  return combinedUserStats;
+}
+function handleEmptyCollections(collections){
+  return collections.filter((col) => col.lessons !== 0);
+}
+
+export async function fetchStats(user, setStats){
+  try{
+    if (user) {
+      let userStats = await getUserStats(user);
+      if(!userStats){
+        throw "Stats is does not exist"
+      }
+      updateScores(user, userStats);
+      setStats(userStats);
+    }
+  }catch(error){
+    console.error(error);
+  }
+}
+
+export async function updateScores(user, stats) {
+  const docRef = doc(database, `Users/${user.email}`)
   updateDoc(docRef, stats);
 }
-export async function loadLeaderboard() {
-  let userCollection = collection(database, "Users");
-  let doesCollectionExists = (await getDocs(userCollection)).empty;
 
-  if (doesCollectionExists) return;
-  const q =  query(userCollection, orderBy('averageWPM', 'desc'), limit(3));
+export async function loadLeaderboard(type) {
+  let userCollection = collection(database, "Users");
+  if (await isCollectionEmpty(userCollection)) return;
+
+  const q =  query(userCollection, orderBy(type, 'desc'), limit(10));
+
   let docs = await getDocs(q);
   const leaderboard = [];
   docs.forEach((doc) => {
     leaderboard.push({ id: doc.id, ...doc.data() });
   });
-  console.log(leaderboard)
+
   return leaderboard;
+}
+
+async function isCollectionEmpty(collection){
+  let q = query(collection, limit(1));
+  return await getDocs(q).empty;
 }

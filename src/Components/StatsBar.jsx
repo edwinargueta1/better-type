@@ -1,12 +1,11 @@
 export default function StatsBar({  error, accuracy, phraseRunTime, wordsPerMin }) {
   return (
-    <div id="statBarAreaWrapper">
-      <div id="statBar">
-        <p>Stats:</p>
-        <p>WPM: {wordsPerMin.toFixed(1)}</p>
-        <p>Accuracy: {accuracy}%</p>
-        <p>Errors: {error}</p>
-        <p>Time: {(phraseRunTime / 1000).toFixed(2)}s</p>
+    <div className="statBarAreaWrapper">
+      <div className="statBar">
+        <p>WPM: <span className="values">{wordsPerMin.toFixed(1)}</span></p>
+        <p>Accuracy: <span className="values">{accuracy}%</span></p>
+        <p>Errors: <span className="values">{error}</span></p>
+        <p>Time: <span className="values">{(phraseRunTime / 1000).toFixed(2)}s</span></p>
       </div>
     </div>
   );

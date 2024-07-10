@@ -1,33 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
-import TextBox from "./TextBox";
-import StatsBar from "./StatsBar";
-import DataTable from "./DataTable";
+import TextBox from "../Components/TextBox.jsx";
+import StatsBar from "../Components/StatsBar.jsx";
+import DataTable from "../Components/DataTable.jsx";
 import {
   sendToPhraseDatabase,
   createFirebaseTimestamp,
-  getUserStats,
 } from "../config/firebase.js";
 
-export default function TypeGame({ user, dictionary }) {
+export default function TypeGame({ user, dictionary, setTopUsers, loadedTopUsers, phraseHistoryData, setPhraseHistoryData, isProfileStatsLoaded, setStats}) {
   const [phrase, setPhrase] = useState([]);
   const [phraseRunTime, setPhraseRunTime] = useState(0);
   const [error, setError] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
   const [wordsPerMin, setWordsPerMin] = useState(0);
 
-  const [phraseHistoryData, setPhraseHistoryData] = useState([]);
+  
   let localStoragePhraseData = useRef([]);
   let phraseWordCount = useRef(10);
   const LESSON_BUFFER = 5;
 
-  //Debuggingg----------
-  useEffect(() => {
-    // console.log(phraseHistoryData);
-  }, [phraseHistoryData]);
-
   //Local Storage Access
   useEffect(() => {
-    // console.log(localStoragePhraseData.current, phraseHistoryData);
     if (window.localStorage.getItem("storedLessons")) {
       localStoragePhraseData.current = JSON.parse(
         window.localStorage.getItem("storedLessons")
@@ -46,34 +39,44 @@ export default function TypeGame({ user, dictionary }) {
     phraseWordCount.current = len;
     getNewPhrase();
   }
+  function resetTopUserData(){
+    setTopUsers([[],[],[]]);
+    loadedTopUsers.current = {
+      10: false,
+      20: false,
+      30: false
+    }
+  }
+  function clearLocalProfileStats(){
+    isProfileStatsLoaded.current = false;
+    setStats(null);
+  }
 
-  function addNewPhraseData(wpm, err, totalTime) {
-    // console.log(`ran AddNewPhraseData`, phraseHistoryData);
+  function addNewPhraseData(wpm, err, totalTime, completedWords) {
+    resetTopUserData();
+    clearLocalProfileStats();
     setAccuracy(calculateAccuracy(err, phrase.length));
-    // console.log(createFirebaseTimestamp())
-    // console.log(typeof wpm, wpm , wpm.toFixed(1))
     const curPhraseData = {
       WPM: Number(wpm.toFixed(1)),
       accuracy: accuracy,
       errors: err,
       phraseRunTime: Number((totalTime / 1000).toFixed(2)),
-      timeCompleted: createFirebaseTimestamp(), //createFirebaseTimestamp(), //new Date().getTime(),
+      timeCompleted: createFirebaseTimestamp(),
+      completedWords: completedWords
     };
 
     sendToPhraseDatabase(user, curPhraseData);
 
     const curPhraseHistoryData = [...phraseHistoryData];
-    curPhraseHistoryData.push(curPhraseData);
+    curPhraseHistoryData.unshift(curPhraseData);
 
-    localStoragePhraseData.current.push(curPhraseData);
-    console.log(`Check`, localStoragePhraseData.current, phraseHistoryData); ///////------------------
+    localStoragePhraseData.current.unshift(curPhraseData);
 
     while (curPhraseHistoryData.length > LESSON_BUFFER) {
-      //shift off the oldest value
-      curPhraseHistoryData.shift();
+      curPhraseHistoryData.pop();
     }
     while (localStoragePhraseData.current.length > LESSON_BUFFER) {
-      localStoragePhraseData.current.shift();
+      localStoragePhraseData.current.pop();
     }
 
     //Storing to local
@@ -82,7 +85,6 @@ export default function TypeGame({ user, dictionary }) {
       JSON.stringify(localStoragePhraseData.current)
     );
     setPhraseHistoryData(curPhraseHistoryData);
-    getUserStats(user, "WPM"); // Add Page for this
   }
 
   //Stores letters of random words in to an array
@@ -110,7 +112,7 @@ export default function TypeGame({ user, dictionary }) {
   }
 
   return (
-    <div className="gameWrapper">
+    <div className="pageWrapper">
       <StatsBar
         error={error}
         accuracy={accuracy}

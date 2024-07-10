@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import UtilBar from "./UtilBar";
+import WordCountSelector from "./WordCountSelector";
 
 export default function TextBox({
   dictionary,
@@ -16,11 +16,11 @@ export default function TextBox({
   addNewPhraseData,
   phraseWordCount
 }) {
-  //Component level Variables
+
   const [focused, setFocused] = useState(false);
   const phraseStartTime = useRef(null);
   const [indexOfCurLetter, setIndexOfCurLetter] = useState(0);
-  const [completedWords, setCompletedWords] = useState(1);
+  const [completedWords, setCompletedWords] = useState(0);
   const onlyLettersRegex = new RegExp("[A-Za-z\\s]");
   const averageEnglishWord = 5;
 
@@ -41,10 +41,8 @@ export default function TextBox({
   //Event listener for keyboard input
   useEffect(() => {
     if (phrase.length > 0) {
-      //Mount
       document.addEventListener("keydown", handleKeyPress);
-
-      //Remove
+      
       return () => {
         document.removeEventListener("keydown", handleKeyPress);
       };
@@ -90,7 +88,7 @@ export default function TextBox({
       //Resetting Variables
       setPhraseRunTime(0);
       setError(0);
-      setCompletedWords(0);
+      setCompletedWords(1);
       setAccuracy(0);
       phraseStartTime.current = performance.now();
     }
@@ -135,12 +133,11 @@ export default function TextBox({
       const endTime = performance.now();
       const totalTime = (endTime - phraseStartTime.current);  // Calculate in seconds
       const wpm = ((indexOfCurLetter/ averageEnglishWord) / (totalTime / 1000)) * 60;
-
       setWordsPerMin(wpm)
-      setPhraseRunTime(totalTime);  // This should set the correct time
+      setPhraseRunTime(totalTime);
       getNewPhrase();
       phraseStartTime.current = null;
-      addNewPhraseData(wpm, error, totalTime);
+      addNewPhraseData(wpm, error, totalTime, completedWords);
       setIndexOfCurLetter(0);
     }
   }
@@ -173,9 +170,9 @@ export default function TextBox({
   }
 
   return (
-    <div className="textBoxWrapper" onFocus={isFocused}
+    <div className="textBoxWrapper" >
+      <div className="typingIndicatorOverlay" onFocus={isFocused}
     onBlur={isNotFocused} tabIndex={0}>
-      <div className="typingIndicatorOverlay" >
       <p className={`indicator ${focused ? "hidden" : ""}`}>Click here to start typing!</p>
       <div
         className={`textBox ${focused ? "" : "notFocused"}`}
@@ -208,10 +205,19 @@ export default function TextBox({
             );
           })}
         </p>
+        </div>
+      </div>
+      <div className="utilBarTypeGame">
+      <button className="clearButton" onClick={() => {
+        getNewPhrase();
+        resetParams();
+      }}>
+        New Phrase
+      </button>
+      <WordCountSelector setState={setPhraseLength} curPhraseCount={phraseWordCount} />
+
       </div>
     </div>
-        <UtilBar getNewPhrase={getNewPhrase} resetParams={resetParams} setPhraseLength={setPhraseLength} phraseWordCount={phraseWordCount}/>
-    </div>
-    
+
   );
 }
