@@ -8,6 +8,7 @@
   --textCorrectedColor: rgb(190, 110, 4);
   --primaryColor:rgb(48, 110, 51);
   --secondaryColor: rgb(46, 134, 38);
+  --selectedColor: rgb(1,1,1);
   background-color: var(--backgroundColor);
 }
 
@@ -28,6 +29,9 @@ h1{
   color:var(--textColor);
 }
 h2{
+  color: var(--textColor);
+}
+h3{
   color: var(--textColor);
 }
 li{
@@ -62,6 +66,13 @@ button:active{
   background-color: var(--primaryColor);
   color: black;
 }
+button:active:hover{
+  background-color: var(--primaryColor);
+  color: black;
+}
+button:hover{
+  background-color: var(--selectedColor);
+}
 table{
   color:var(--textColor);
   background-color: var(--menuBackgroundColor);
@@ -92,6 +103,7 @@ tr.dimmed5{
   width: 100vw;
   display: flex;
   flex-direction: column;
+  /* border: solid red 1px; */
 }
 .title{
   display: flex;
@@ -106,6 +118,7 @@ tr.dimmed5{
   align-items: center;
   justify-content: center;
   padding-bottom: 5px;
+  /* border: solid red 1px; */
 }
 .navBarWrapper .navBar ul{
   display: flex;
@@ -273,9 +286,6 @@ tr.dimmed5{
   color: black;
   transition: 400ms;
 }
-.menuBackground button:hover{
-  cursor:pointer;
-}
 /* PROFILE CARD END */
 
 /* POP-UP FORM */
@@ -312,6 +322,8 @@ tr.dimmed5{
   border: black 1px solid;
   border-radius: 16px;
   padding: 8px;
+  padding-left:10px;
+  padding-right: 10px;
   margin: 10px;
 }
 .popUpContainerOuter .popUpForm input:focus{
@@ -336,7 +348,7 @@ tr.dimmed5{
   transition: 0.3s;
 }
 .utilBarWrapper button:hover{
-  background-color: var(--textColorDimmed);
+  background-color: var(--selectedColor);
 }
 .utilBarWrapper .clearButton:active{
   background-color: var(--primaryColor);
@@ -358,11 +370,11 @@ tr.dimmed5{
 }
 .pageWrapper{
   display: flex;
-  height: 100%;
-  align-items: center;
   flex-direction: column;
-  margin: auto;
+  align-items: center;
   padding-top: 20px;
+  height: 100%;
+  box-sizing: border-box;
 }
 .profilePage .joinDateProfile{
   font-size: 13px;
@@ -409,4 +421,18 @@ tr.dimmed5{
   height: 100%;
   align-items: center;
   justify-content: center;
+}
+button.critical{
+  color: red;
+  padding: 8px;
+  background-color: rgb(50, 0, 0);
+}
+button.critical:hover{
+  color: red;
+  padding: 8px;
+  background-color: rgb(80, 0, 0);
+}
+p.warning{
+  color: rgb(199, 0, 0);
+  padding: 10px;
 }

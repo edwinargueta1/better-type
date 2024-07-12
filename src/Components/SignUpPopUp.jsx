@@ -20,6 +20,7 @@ export default function SignUpPopUp({ popUpState, setPopUp }) {
       reEnterPassword: "",
     });
     setSignUpIndicator("");
+    setGoogleUserName("");
   }
   
 
@@ -60,7 +61,6 @@ export default function SignUpPopUp({ popUpState, setPopUp }) {
         ></input>
         <br />
         <button type="submit" onClick={async (event) => {
-          console.log("From button: ", newUser)
           await signUpWithEmail(event, newUser, setSignUpIndicator);
           clearTempData();
         }}>

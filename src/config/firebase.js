@@ -26,7 +26,8 @@ import {
   getDoc,
   getDocs,
   query,
-  where
+  where,
+  deleteDoc
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -41,7 +42,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const database = getFirestore(app);
@@ -140,11 +140,11 @@ async function validSignUp(user, setIndicator) {
   return true;
 }
 
-function validFormatUserName(userName, setIndicator) {
+export function validFormatUserName(userName, setIndicator) {
   const validUsernameRegex = /^[A-Za-z0-9]+$/;
 
   //Username length needs to be between 1 and 16 characters
-  if (userName.length < 1 && userName.length > 16) {
+  if (userName.length < 1 || userName.length > 16) {
     setIndicator("Username must be between 1 - 16 characters.");
     return false;
   }
@@ -155,12 +155,25 @@ function validFormatUserName(userName, setIndicator) {
   }
   return true;
 }
-async function userNameIsTaken(userName){
+export async function userNameIsTaken(displayName){
   const usersCol = collection(database, "Users");
-  const userNameQuery = query(usersCol, where("userName", "==", userName), limit(1));
+  const userNameQuery = query(usersCol, where("userName", "==", displayName), limit(1));
   const userNameSnapshot = await getDocs(userNameQuery);
-  console.log(userNameSnapshot, userNameSnapshot.empty);
   return !userNameSnapshot.empty;
+}
+
+export async function changeUsername(user, newDisplayName, setIndicator){
+  //Change the username through auth and firestore
+  try{
+    const userRef = doc(database, `Users/${user.email}`);
+    await updateProfile(user, {displayName: newDisplayName});
+    await updateDoc(userRef, {displayName: newDisplayName});
+    setIndicator("Successfully changed username")
+  }catch(error){
+    console.error(error);
+    setIndicator("Something went wrong")
+    return;
+  }
 }
 
 async function signUpSuccess(user, setIndicator) {
@@ -194,11 +207,16 @@ export async function signUpWithGoogle(event, userName, setIndicator) {
     return;
   }
   try {
-    signInWithPopup(auth, googleProvider).then(async(res) => {
-      await updateProfile(res.user, {displayName: userName});
+    let res = await signInWithPopup(auth, googleProvider);
+    const userRef = doc(database, `Users/${res.user.email}`);
+    const snapshot = await getDoc(userRef);
+    if(snapshot.exists){
+      setIndicator("Account already exists. Logged in.");
+      return;
+    }else{
+      await updateProfile(res.user,{displayName: userName});
       createNewUserInFirestore(res.user);
-      return res;
-    })
+    }
   } catch (error) {
     console.error(error);
   }
@@ -227,6 +245,36 @@ export async function loginWithGoogle(event, setIndicator, setPopUp) {
 
 export function logout(auth) {
   signOut(auth);
+}
+
+export async function removeUser(user){
+  const colRef10 = collection(database, `Users/${user.email}/lessonHistory10`);
+  const colRef20 = collection(database, `Users/${user.email}/lessonHistory20`);
+  const colRef30 = collection(database, `Users/${user.email}/lessonHistory30`);
+  
+  const userDataSnapshot = [
+    getDocs(colRef10),
+    getDocs(colRef20),
+    getDocs(colRef30)
+  ]
+  const userDataPromise = await Promise.all(userDataSnapshot);
+
+  const deletePromises = []; 
+  userDataPromise.forEach((collection)=>{
+    collection.forEach((document)=> {
+      deletePromises.push(deleteDoc(document.ref))
+    })
+  })
+
+  await Promise.all(deletePromises);
+
+  //Deleting main user
+  const userRef = doc(database, `Users/${user.email}`);
+  await deleteDoc(userRef);
+
+  //Delete Auth
+  deleteUser(user);
+
 }
 
 export function createFirebaseTimestamp() {

@@ -33,6 +33,7 @@ function App() {
   const isProfileStatsLoaded = useRef(false);
 
   function clearState(){
+    console.log("cleared state")
     setTopUsers([[],[],[]]);
     loadedTopUsers.current = {
       10: false,
@@ -48,11 +49,11 @@ function App() {
   //User Management
   useEffect(()=>{
     const stateOfAuth = onAuthStateChanged(auth, (user) =>{
-      clearState();
       if(user){
         setUser(user);
       }else{
         setUser(null);
+        clearState();
       }
     });
 
