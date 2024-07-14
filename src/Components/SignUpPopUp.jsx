@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signUpWithGoogle, signUpWithEmail } from "../config/firebase";
 import { toggleState } from "../Functions/localDataManagement";
 
@@ -22,6 +22,11 @@ export default function SignUpPopUp({ popUpState, setPopUp }) {
     setSignUpIndicator("");
     setGoogleUserName("");
   }
+
+  //Reset input values
+  useEffect(()=>{
+    clearTempData();
+  },[popUpState]);
   
 
   return popUpState ? (
@@ -62,7 +67,7 @@ export default function SignUpPopUp({ popUpState, setPopUp }) {
         <br />
         <button type="submit" onClick={async (event) => {
           await signUpWithEmail(event, newUser, setSignUpIndicator);
-          clearTempData();
+          // clearTempData();
         }}>
           Submit
         </button>

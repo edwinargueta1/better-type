@@ -46,15 +46,15 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const database = getFirestore(app);
 
-//Dev Mode
-if (
-  window.location.hostname.includes("127.0.0.1") ||
-  window.location.hostname.includes("localhost")
-) {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099");
-  connectFirestoreEmulator(database, "127.0.0.1", 8080);
-}
-//...Dev Mode End
+// //Dev Mode
+// if (
+//   window.location.hostname.includes("127.0.0.1") ||
+//   window.location.hostname.includes("localhost")
+// ) {
+//   connectAuthEmulator(auth, "http://127.0.0.1:9099");
+//   connectFirestoreEmulator(database, "127.0.0.1", 8080);
+// }
+// //...Dev Mode End
 
 export async function createNewUserInFirestore(user) {
   const userData = {
@@ -132,11 +132,9 @@ async function validSignUp(user, setIndicator) {
   }
 
   if(await userNameIsTaken(user.displayName)){
-    console.log("Username taken? ", userNameIsTaken(user.displayName))
     setIndicator("Username is taken. Try another.");
     return false;
   }
-  console.log(`passed validsign up`)
   return true;
 }
 
@@ -157,7 +155,7 @@ export function validFormatUserName(userName, setIndicator) {
 }
 export async function userNameIsTaken(displayName){
   const usersCol = collection(database, "Users");
-  const userNameQuery = query(usersCol, where("userName", "==", displayName), limit(1));
+  const userNameQuery = query(usersCol, where("displayName", "==", displayName), limit(1));
   const userNameSnapshot = await getDocs(userNameQuery);
   return !userNameSnapshot.empty;
 }
@@ -210,7 +208,7 @@ export async function signUpWithGoogle(event, userName, setIndicator) {
     let res = await signInWithPopup(auth, googleProvider);
     const userRef = doc(database, `Users/${res.user.email}`);
     const snapshot = await getDoc(userRef);
-    if(snapshot.exists){
+    if(snapshot.exists()){
       setIndicator("Account already exists. Logged in.");
       return;
     }else{
@@ -403,21 +401,26 @@ export async function updateScores(user, stats) {
 }
 
 export async function loadLeaderboard(type) {
-  let userCollection = collection(database, "Users");
-  if (await isCollectionEmpty(userCollection)) return;
-
-  const q =  query(userCollection, orderBy(type, 'desc'), limit(10));
-
-  let docs = await getDocs(q);
-  const leaderboard = [];
-  docs.forEach((doc) => {
-    leaderboard.push({ id: doc.id, ...doc.data() });
-  });
-
-  return leaderboard;
+  try{
+    let userCollection = collection(database, "Users");
+    if (await isCollectionEmpty(userCollection)) return;
+  
+    const q =  query(userCollection, orderBy(type, 'desc'), limit(10));
+  
+    let docs = await getDocs(q);
+    const leaderboard = [];
+    docs.forEach((doc) => {
+      leaderboard.push({ id: doc.id, ...doc.data() });
+    });
+  
+    return leaderboard;
+  }catch(error){
+    console.error(error);
+    return [];
+  }
 }
 
 async function isCollectionEmpty(collection){
   let q = query(collection, limit(1));
-  return await getDocs(q).empty;
+  return (await getDocs(q)).empty;
 }

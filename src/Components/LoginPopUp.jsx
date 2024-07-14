@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { loginUserWithEmail, loginWithGoogle } from "../config/firebase";
 import { toggleState } from "../Functions/localDataManagement";
 
@@ -17,6 +17,11 @@ export default function LoginPopUp({ popUpState, setPopUp }) {
     });
     setLoginIndicator("");
   }
+
+  //Reset input values
+  useEffect(()=>{
+    clearTempData();
+  },[popUpState]);
 
   return popUpState ? (
     <div

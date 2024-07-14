@@ -12,11 +12,16 @@ export default function ProfilePage(props) {
 
   //Set user Information
   useEffect(() => {
-    if (!props.isProfileStatsLoaded.current) {
-      setIsLoading(true);
-      fetchStats(props.user, props.setStats);
-      props.isProfileStatsLoaded.current = true;
-    }
+    const loadStats = async () => {
+      if (!props.isProfileStatsLoaded.current) {
+        setIsLoading(true);
+        await fetchStats(props.user, props.setStats);
+        props.isProfileStatsLoaded.current = true;
+      }
+    };
+
+    loadStats();
+
     setIsLoading(false);
   }, [props.user]);
 

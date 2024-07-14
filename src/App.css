@@ -154,6 +154,7 @@ tr.dimmed5{
 }
 .textBox p{
   font-size: 30px;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .textBox p.notFocused{
   transition: 1s ease;
@@ -285,6 +286,24 @@ tr.dimmed5{
   background-color: white;
   color: black;
   transition: 400ms;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .title {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .titleName {
+    margin: 10px 0;
+  }
+  .menuBackground {
+    margin-left: 0;
+  }
+  .menuBackground .profileContainer{
+    background: var(--menuBackgroundColor);
+  }
 }
 /* PROFILE CARD END */
 
@@ -435,4 +454,42 @@ button.critical:hover{
 p.warning{
   color: rgb(199, 0, 0);
   padding: 10px;
+}
+.footer{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  height: 30px;
+  /* border: red solid 1px; */
+  /* overflow: none; */
+}
+.footer p{
+  font-size: 16px;
+}
+.footer a{
+  padding-right: 20px;
+}
+.footer a:last-child{
+  padding-right: none;
+}
+.footer a .logoWrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color:inherit;
+  transition: 0.5s;
+}
+.footer a .logoWrapper:hover{
+  color: white;
+  /* background-color: red; */
+  transition: 0.5s;
+  transform: translateY(-5px) scale(1.1);
+  /* transform: scale(2); */
+}
+#githubFooterLogo{
+  height: 20px;
+  width: 20px;
+  margin-right: 5px;
+  /* border: red 1px solid; */
 }
