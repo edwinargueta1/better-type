@@ -33,6 +33,7 @@ h2{
 }
 h3{
   color: var(--textColor);
+
 }
 li{
   text-decoration: none;
@@ -46,7 +47,6 @@ a.active {
   color: var(--primaryColor);
 }
 p{
-  /* background-color: black; */
   font-size: 16px;
   font-family:'Arial Narrow', Arial, sans-serif;
   color: var(--textColor);
@@ -325,13 +325,16 @@ tr.dimmed5{
 .popUpContainerOuter p{
   padding-bottom: 12px;
 }
+.popUpContainerOuter h3{
+  padding-bottom: 12px;
+}
 .popUpContainerOuter .popUpForm{
   background-color: var(--backgroundColor);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 32px;
-  width: fit-content;
+  width: 200px;
   height: fit-content;
   z-index: 2;
   border-radius: 16px;

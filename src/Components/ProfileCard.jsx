@@ -1,20 +1,26 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { auth, logout } from "../config/firebase.js"
 
 export default function ProfileCard({
-  user,
+  displayName,
+  stats,
   isLoginActive,
   setIsLoginActive,
   isSignUpActive,
   setIsSignUpActive,
   toggleState,
 }) {
+  const [dName, setDName] = useState(displayName);
+
+  useEffect(() => {
+    setDName(displayName);
+  }, [displayName, stats])
 
   return (
     <div className="menuBackground">
       <div className="profileContainer">
-        <p className="accountName">{user ? user.displayName : "Guest"}</p>
-        {user ? (
+        <p className="accountName">{dName ? dName : "Guest"}</p>
+        {dName ? (
           <div className="signInLogInWrapper">
             <button className="loginButton" onClick={() => logout(auth)}>
               Sign Out

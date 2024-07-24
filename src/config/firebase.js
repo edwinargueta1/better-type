@@ -87,39 +87,27 @@ export async function signUpWithEmail(event, user, setIndicator){
   }
 }
 
-export async function loginUserWithEmail(event, email, password, setIndicator) {
-  event.preventDefault();
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    if (error.message === "Firebase: Error (auth/user-not-found)."){
-      return setIndicator('User Not Found.')
+export async function loginUserWithEmail(email, password, setIndicator) {
+    if(!validEmail(email, setIndicator)){
+      throw new Error("Email is not valid");
     }
-      return setIndicator(error.message);
-  }
+    if(!validPassword(password, password, setIndicator)){
+      throw new Error("Password is not valid");
+    }
+    await signInWithEmailAndPassword(auth, email, password);
 }
 
 async function validSignUp(user, setIndicator) {
-
-  const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
-  //Valid password
-  if (user.password.length < 6) {
-    setIndicator("Password must be 6 characters or longer.");
-    return false;
-  }
-  //If both passwords don't match
-  if (user.password !== user.reEnterPassword) {
-    setIndicator("Passwords do not match.");
-    return false;
-  }
   //Username correct format
   if(!validFormatUserName(user.displayName, setIndicator)){
     return false;
   }
-  //correct email format
-  if (!validEmailRegex.test(user.email)) {
-    setIndicator("Not a valid email format.");
+
+  if(!validEmail(user.email, setIndicator)){
+    return false;
+  }
+  if(!validPassword(user.password, user.reEnterPassword, setIndicator)){
     return false;
   }
 
@@ -136,6 +124,37 @@ async function validSignUp(user, setIndicator) {
     return false;
   }
   return true;
+}
+
+export function validPassword(password1, password2, setIndicator){
+  //Valid password
+  if (password1.length < 6) {
+    setIndicator("Password must be 6 characters or longer.");
+    return false;
+  }
+  //If both passwords don't match
+  if (password1 !== password2) {
+    setIndicator("Passwords do not match.");
+    return false;
+  }
+  return true;
+}
+export function validEmail(email, setIndicator){
+  const validEmailRegex = /^[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,}$/;
+
+    //Valid Overall length
+    if(email.length > 320){
+      console.log("length")
+      setIndicator("Not a valid email length")
+      return false;
+    }
+    //correct email format
+    if (!validEmailRegex.test(email)) {
+      console.log("format")
+      setIndicator("Not a valid email format.");
+      return false;
+    }
+    return true;
 }
 
 export function validFormatUserName(userName, setIndicator) {
@@ -166,7 +185,8 @@ export async function changeUsername(user, newDisplayName, setIndicator){
     const userRef = doc(database, `Users/${user.email}`);
     await updateProfile(user, {displayName: newDisplayName});
     await updateDoc(userRef, {displayName: newDisplayName});
-    setIndicator("Successfully changed username")
+    setIndicator("Successfully changed username");
+    return user;
   }catch(error){
     console.error(error);
     setIndicator("Something went wrong")

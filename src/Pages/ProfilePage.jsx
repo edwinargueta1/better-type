@@ -13,22 +13,22 @@ export default function ProfilePage(props) {
   //Set user Information
   useEffect(() => {
     const loadStats = async () => {
+      setIsLoading(true);
       if (!props.isProfileStatsLoaded.current) {
-        setIsLoading(true);
         await fetchStats(props.user, props.setStats);
         props.isProfileStatsLoaded.current = true;
       }
     };
 
     loadStats();
-
     setIsLoading(false);
-  }, [props.user]);
+  }, [props.user, ]);
 
   return (
     <div className="pageWrapper">
       <SettingsPopUp
         user={props.user}
+        setUser={props.setUser}
         popUpState={popUpState}
         setPopUpState={setPopUpState}
       />

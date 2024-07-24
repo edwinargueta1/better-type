@@ -49,16 +49,26 @@ function App() {
 
   //User Management
   useEffect(() => {
-    const stateOfAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-        clearState();
-      }
-    });
+    let stateOfAuth;
+    try{
+      stateOfAuth = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setUser(user);
+          isProfileStatsLoaded.current = false;
+        } else {
+          setUser(null);
+          clearState();
+        }
+      });
+    }catch(error){
+      console.error(error);
+    }
 
-    return () => stateOfAuth();
+    return () => {
+      if(stateOfAuth){
+        stateOfAuth();
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -87,7 +97,8 @@ function App() {
           <div className="spacer"></div>
           <h1 className="titleName">Better Type</h1>
           <ProfileCard
-            user={user}
+            displayName={user?.displayName}
+            stats={stats}
             isLoginActive={isLoginActive}
             setIsLoginActive={setIsLoginActive}
             isSignUpActive={isSignUpActive}
@@ -118,6 +129,7 @@ function App() {
             element={
               <ProfilePage
                 user={user}
+                setUser={setUser}
                 stats={stats}
                 setStats={setStats}
                 isProfileStatsLoaded={isProfileStatsLoaded}

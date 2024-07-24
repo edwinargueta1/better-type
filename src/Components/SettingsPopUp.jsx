@@ -27,15 +27,17 @@ export default function SettingsPopUp(props) {
     setCount((prev) => prev + 1);
   }
 
-  async function handleUsernameChange(){
+  async function handleUsernameChange(user){
     if(!validFormatUserName(userName, setIndicator)){
         return;
     }
     if(await userNameIsTaken(userName)){
-        setIndicator("Username Taken");
+        setIndicator(`Username Taken: ${userName}`);
         return;
     }
-    await changeUsername(props.user, userName, setIndicator);
+    props.setUser(null);
+    const updatedUser = await changeUsername(user, userName, setIndicator);
+    props.setUser(updatedUser);
   }
 
   return props.popUpState ? (
@@ -63,12 +65,12 @@ export default function SettingsPopUp(props) {
           </svg>
         </div>
         <h2>Settings</h2>
-        <p>_____________________________</p>
+        <p>______________________</p>
         <h3>Change Username?</h3>
         <input placeholder="New Username" onChange={(e)=>{setUsername(e.target.value)}}></input>
-        <button onClick={()=>{handleUsernameChange()}}>Set New Username</button>
+        <button onClick={()=>{handleUsernameChange(props.user)}}>Set New Username</button>
         <p style={{padding: "8px"}}>{indicator}</p>
-        <p>_____________________________</p>
+        <p>______________________</p>
         <h3>Remove account and all data?</h3>
         <p className="warning">{warnings[count]}</p>
         <button className="critical" onClick={handleDelete}>

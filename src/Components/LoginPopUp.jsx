@@ -8,15 +8,26 @@ export default function LoginPopUp({ popUpState, setPopUp }) {
     email: "",
     password: ""
   });
-  const [loginIndicator, setLoginIndicator] = useState('');
+  const [loginIndicator, setLoginIndicator] = useState(null);
 
   function clearTempData(){
     setUser({
       email: "",
       password: ""
     });
-    setLoginIndicator("");
+    setLoginIndicator(null);
   }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await loginUserWithEmail(user.email, user.password, setLoginIndicator);
+      toggleState(popUpState, setPopUp);
+    } catch (error) {
+      setLoginIndicator(error.message);
+      return;
+    }
+  };
 
   //Reset input values
   useEffect(()=>{
@@ -29,7 +40,7 @@ export default function LoginPopUp({ popUpState, setPopUp }) {
       onClick={() => toggleState(popUpState, setPopUp)}
     >
       <form className="popUpForm" onClick={(event) => event.stopPropagation()}>
-        <p>Log In</p>
+        <h3>Log In</h3>
         <br />
         <input
           placeholder="Email"
@@ -44,14 +55,7 @@ export default function LoginPopUp({ popUpState, setPopUp }) {
           onChange={(e) => setUser({ ...user, password: e.target.value })}
         ></input>
         <br />
-        <button type="submit" onClick={(e)=>{
-          clearTempData();
-          loginUserWithEmail(e, user.email, user.password, setLoginIndicator);
-          if(loginIndicator.length < 1){
-            clearTempData();
-            toggleState(popUpState, setPopUp)
-          }
-          }}>
+        <button type="submit" onClick={handleSubmit}>
           Submit
         </button>
         <p className="verticalSpacer">__________________</p>
