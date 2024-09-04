@@ -67,7 +67,6 @@ export default function SignUpPopUp({ popUpState, setPopUp }) {
         <br />
         <button type="submit" onClick={async (event) => {
           await signUpWithEmail(event, newUser, setSignUpIndicator);
-          // clearTempData();
         }}>
           Submit
         </button>
